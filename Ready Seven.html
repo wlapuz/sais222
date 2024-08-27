@@ -1,0 +1,2394 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Claim Review and Management Tool</title>
+<style>
+    
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+    width: 3px;
+    height: 5px;
+    opacity: 0;
+}
+
+.intro-container{position:fixed;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;
+    background: black;
+    ;z-index:1000;transition:opacity 1s}
+    .intro-text{font-size:6rem;font-weight:300}
+    .signature{font-size:2rem;font-weight:300}
+    .intro-text,.signature{opacity:0;transform:translateY(40px);animation:fadeInUp 2s forwards}
+    .signature{animation-delay:1s}
+    .char{display:inline-block;opacity:0;transform:translateY(40px);animation:charAnimation .5s forwards;transition:.3s}
+    .char:hover{color:#FF69B4;text-shadow:0 0 10px #FF69B4;transform:translateY(-5px)}
+    .skip-intro{position:absolute;bottom:20px;right:20px;color:rgba(255, 255, 255, 0.233);font-size:3rem}
+    @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+    @keyframes charAnimation{to{opacity:1;transform:translateY(0)}}
+
+:root {
+    --gap: 12px;
+    --border-radius: 12px;
+    --primary: linear-gradient(rgba(255, 255, 255, 0.034), rgba(49, 49, 49, 0.425)),
+               linear-gradient(to top, #000000, #0e0e0e, #111);
+    --secondary: #222222;
+    --bg: rgba(0, 0, 0, 0.911);
+    --text: #dbd7bc;
+    --transition: all 0.3s;
+
+    /* Dark mode (default) */
+    --green-bg: rgba(53, 255, 53, 0.1);
+    --red-bg: rgba(255, 62, 62, 0.1);
+    --warning-bg: rgba(255, 165, 0, 0.1);
+    --green-text: #35ff35;
+    --red-text: #ff3434;
+    --warning-text: #ffaf1b;
+    --not-needed-bg: rgba(255, 255, 255, 0.1);
+    --not-needed-text: #ffffff;
+
+    /* New variables */
+    --hover-bg: rgba(255, 255, 255, 0.2);
+    --special-field-bg: var(--secondary);
+    --input-bg: rgba(255, 255, 255, 0.1);
+    --border-color: rgba(255, 255, 255, 0.2);
+    --button-bg: rgba(255, 255, 255, 0.1);
+    --selected-button-bg: rgba(0, 178, 178, 0.5);
+    --selected-button-border: var(--accent);
+
+    --ca-bg-dark: #121212;
+    --ca-bg-light: #1E1E1E;
+    --ca-text-primary: #FFFFFF;
+    --ca-text-secondary: #B3B3B3;
+    --ca-accent: #BB86FC;
+    --ca-error: #CF6679;
+    --ca-success: #03DAC5;
+}
+
+/* General Styles */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body, html {
+    height: 100vh;
+    font-family: 'Segoe UI', Geneva, Verdana, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    scroll-behavior: smooth;
+    font-size: 12px;
+    display: grid;
+}
+
+#fillButton, #fill2Button{
+    position:absolute;
+    left:30%;
+}
+#fill2Button{
+    left:50%!important;
+}
+
+/* Layout */
+.container {
+    display: grid;
+    height: 100vh;
+    grid-template-columns: 1.9fr 1fr 1fr;
+    gap: var(--gap);
+    padding: 30px;
+    width:100%;
+}
+
+.main, .middle, .utilities {
+    display: grid;
+    gap: var(--gap);
+    width:100%;
+    height:100%;
+    overflow-y: hidden;
+}
+
+.main { grid-template-rows: 1fr 0.6fr 0.2fr; }
+.middle { grid-template-rows: 0.15fr 1.5fr 0.2fr; }
+#Decisionings{ overflow-y: hidden; grid-template-rows: 5fr 0.1fr!important; padding:5px;}
+.utilities { grid-template-rows: 1fr 0.6fr 0.2fr; }
+
+.paralyser {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--gap);
+    overflow: hidden;
+    position: relative;
+    height: 100%;
+}
+
+/* Box Styles */
+.box {
+    overflow-y: auto;
+    display: grid;
+    background: var(--primary);
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+    opacity: 0.8;
+    position: relative;
+    height: 100%;
+}
+
+/* Input and Result Styles */
+#xInput, #xResult {
+    position: relative;
+    top: 0;
+    left: 0;
+    background-color: var(--bg);
+    color: var(--text);
+    height:100%;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    padding: 10px;
+}
+
+#xInput { z-index: 1; display: none; }
+
+.content-wrapper{
+    display:grid;
+    grid-template-rows: 0.1fr 0.9fr;
+    padding:5px;
+    position: relative;
+}
+
+#xResult {
+    gap: 10px;
+    background-color: var(--secondary)!important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    margin:0px 0px;
+    border-radius: 12px;
+    max-height:98%!important;
+    margin-top:10px;
+}
+
+/* Field Styles */
+.field-container {
+    font-size: 12px;
+    break-inside: avoid-column;
+    page-break-inside: avoid;
+    transition: background-color 0.5s ease, color 0.5s ease;
+    cursor: pointer;
+    position: relative;
+    padding: 5px;
+    border-radius: var(--border-radius);
+    min-width: 85px;
+    background-color: var(--secondary);
+}
+
+.field-label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 2px;
+    pointer-events: none;
+}
+
+.field-value {
+    background: transparent;
+    border: none;
+    width: 100%;
+    word-break: break-word;
+    display: block;
+    resize: none;
+    transition: background-color 0.3s ease;
+    color: inherit;
+    overflow: hidden;
+    height: 12px;
+    line-height: 1;
+    pointer-events: none;
+}
+
+/* Button Styles */
+button {
+    padding: 0 20px;
+    background-color: var(--secondary);
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+    transition: 0.2s ease-out;
+    height: 30px;
+    line-height: 30px;
+    border-radius: 12px;
+    opacity: 0.9;
+    position: inherit;
+}
+
+button:hover {
+    opacity: 1;
+    background-color: var(--accent);
+}
+
+#timerSegments button {
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box; 
+  }
+  
+  #timerSegments {
+    width: 100%; 
+    display: flex; 
+    justify-content: space-between; 
+    padding:5px;
+    gap:5px;
+  }
+
+shrt-buttons{
+    display: grid;
+    gap: 5px; 
+    grid-template-columns: 9fr 1fr;
+    height:100%;
+    padding:5px;
+}
+
+#gear{
+    height:100%;
+    font-size: 20px;
+}
+
+    sbbox {     
+    display: grid;
+    gap: 5px; 
+    grid-template-rows: 1fr 1fr; 
+    height:100%; gap:5px;
+    overflow-y: hidden;
+}
+
+    sb1r button, sb2r button{
+        height:100%;
+    }
+
+    lower-output{
+        display: grid;
+        grid-template-columns: 4fr 1fr;
+        height:100%;
+        padding:5px;
+        gap:5px;
+    }
+
+    lower-output button{
+        height:100%;
+    }
+
+    .box #timer{
+        height:100%;
+        z-index: 0;
+        background-color: var(--secondary);
+        opacity: 0.8;
+        font-size: 30px;
+    }
+
+    #timerrs{
+        height:100%;
+        z-index: 0;
+        background-color: var(--secondary);
+        opacity: 1;
+        top:0;
+        padding:5px;
+    }
+
+    .box#notings {
+        display: flex;
+        height: 100%;
+        overflow: hidden;
+    }
+    
+    .content-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background-color: var(--primary);
+        border-radius: var(--border-radius) 0 0 var(--border-radius);
+        overflow: hidden;
+    }
+    
+    .tab-container {
+        display: grid;
+        grid-template-rows: 1fr 1fr;
+        background-color: var(--primary);
+        border-radius: 0 var(--border-radius) var(--border-radius) 0;
+        padding: 0px 5px;
+        
+    }
+    
+    .tab-button {
+        height:100%;
+        padding: 10px;
+        background: none;
+        border: none;
+        color: var(--text);
+        cursor: pointer;
+        transition: background-color 0.3s;
+        border-radius: var(--border-radius);
+        margin-bottom: 5px;
+        font-size: 20px;
+    }
+    
+    .tab-button:last-child {
+        margin-bottom: 0;
+    }
+    
+    .tab-button.active {
+        background-color: var(--secondary);
+    }
+    
+    #notepad-view, #calculator-view {
+        flex: 1;
+        display: flex;
+        flex-direction: column-reverse;
+        padding: 0px;
+        overflow-y: auto;
+    }
+
+    #calculator-view {
+        flex-direction: column!important;
+    }
+    
+    /* Notepad styles */
+    .notepad-controls {
+        display: flex;
+        flex-direction:reverse;
+        gap: 5px;
+        margin-top: 5px;
+    }
+    
+    .format-btn, #save-note {
+        padding: 0px 10px;
+        background-color: var(--button-bg);
+        color: var(--text);
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        height:25px;
+        transition: background-color 0.3s;
+    }
+    
+    .format-btn:hover, #save-note:hover {
+        background-color: var(--accent);
+    }
+    
+    #notepad {
+        flex: 1;
+        background-color: var(--secondary);
+        color: var(--text);
+        border: transparent;
+        border-radius: 12px;
+        padding: 15px;
+        overflow-y: auto;
+    }
+
+    #notepad:focus{
+        outline: transparent;
+    }
+    
+    /* Calculator styles */
+    #calc-display {
+        background-color: var(--input-bg);
+        color: var(--text);
+        padding: 10px;
+        text-align: right;
+        font-size: 1.5em;
+        border-radius: 5px;
+        min-height: 2em;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+    
+    .calc-buttons {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 5px;
+    }
+    
+    .calc-btn {
+        padding: 0px;
+        background-color: var(--button-bg);
+        color: var(--text);
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    
+    .calc-btn:hover {
+        background-color: var(--accent);
+    }
+    
+    .calc-btn[data-action="equals"] {
+        grid-row: span 2;
+    }
+
+    #notepad.placeholder {
+        color: gray; /* Or any style you prefer */
+      }
+
+
+      shrt-buttons.box {
+        display: grid;
+        grid-template-columns: 9fr 1fr;
+        gap: 5px;
+        padding: 5px;
+    }
+    
+    sbbox {
+        display: grid;
+        grid-template-rows: 1fr 1fr;
+        gap: 5px;
+    }
+    
+    sb1r, sb2r {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 5px;
+    }
+    
+    .shortcut-btn {
+        position: relative;
+        height: 95%;
+        font-size: 14px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        overflow: hidden;
+        text-align: center;
+        padding: 5px;
+    }
+    
+    .shortcut-btn::after {
+        content: attr(data-shortcut);
+        position: absolute;
+        bottom: -6px;
+        right: 6px;
+        font-size: 10px;
+        opacity: 0.7;
+    }
+
+    @keyframes buttonPress {
+        0% { transform: scale(1); }
+        50% { transform: scale(0.95); }
+        100% { transform: scale(1); }
+      }
+      
+      .button-press-animation {
+        animation: buttonPress 0.3s ease;
+      }
+
+    .shortcut-btn:hover {
+        background-color: var(--accent)!important;
+    }
+    
+    #gear {
+        font-size: 20px;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 5;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.4);
+        backdrop-filter: blur(5px);
+    }
+    
+    .modal-content {
+        background-color: var(--secondary);
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid var(--accent);
+        width: 300px;
+        color: var(--text);
+    }
+    
+    .modal-content input, .modal-content textarea, .modal-content select {
+        width: 100%;
+        margin-bottom: 10px;
+        padding: 5px;
+        background-color: var(--input-bg);
+        color: var(--text);
+        border: 1px solid var(--border-color);
+    }
+    
+    .modal-content button {
+        padding: 5px 10px;
+        margin-right: 10px;
+        background-color: var(--button-bg);
+        color: var(--text);
+        border: none;
+        cursor: pointer;
+    }
+
+    .input-container {
+        position: relative;
+        margin-bottom: 10px;
+    }
+    
+    #charCount {
+        position: absolute;
+        right: 5px;
+        bottom: 5px;
+        font-size: 12px;
+        color: var(--text);
+        opacity: 0.7;
+    }
+
+    #clearAllModal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.4);
+    }
+    
+    #clearAllModal .modal-content {
+        background-color: var(--secondary);
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid var(--accent);
+        width: 300px;
+        color: var(--text);
+        text-align: center;
+    }
+    
+    #clearAllModal button {
+        margin: 10px;
+        padding: 5px 10px;
+        background-color: var(--button-bg);
+        color: var(--text);
+        border: none;
+        cursor: pointer;
+    }
+    
+    #clearAllModal button:hover {
+        background-color: var(--accent);
+    }
+
+    .copy-btn {
+        position: relative;
+        padding: 10px 20px;
+        font-size: 16px;
+        color: var(--text);
+        background-color: var(--secondary);
+        border: none;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .copy-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .copy-btn:active {
+        transform: translateY(0);
+    }
+    
+    .copy-text, .copy-icon {
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+    
+    .copy-icon {
+        position: absolute;
+        right: 20px;
+        opacity: 0;
+    }
+    
+    .copy-btn:hover .copy-text {
+        transform: translateX(-0px);
+    }
+    
+    .copy-btn:hover .copy-icon {
+        opacity: 1;
+        transform: translateX(-0px);
+    }
+    
+    @keyframes ripple {
+        0% {
+            transform: scale(0);
+            opacity: 1;
+        }
+        100% {
+            transform: scale(100);
+            opacity: 0;
+        }
+    }
+    
+    .copy-btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 5px;
+        height: 5px;
+        background: rgba(255, 255, 255, 0.5);
+        opacity: 0;
+        border-radius: 100%;
+        transform: scale(1, 1) translate(-0%);
+        transform-origin: 50% 50%;
+    }
+    
+    .copy-btn:focus:not(:active)::after {
+        animation: ripple 1s ease-out;
+    }
+    
+    @keyframes checkmark {
+        0% {
+            transform: scale(0);
+        }
+        50% {
+            transform: scale(1.2);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+    
+    .copy-btn.copied .copy-icon {
+        animation: checkmark 0.5s ease-in-out;
+    }
+    
+    .copy-btn.copied {
+        background-color: var(--accent);
+    }
+
+
+/* Existing styles... */
+#xOutput::before {
+    content: attr(data-watermark);
+    position: absolute;
+    top: 50%;
+    right: -20px;
+    transform: translateY(-50%) rotate(-90deg);
+    font-size: 24px;
+    color: rgba(128, 128, 128, 0.2);
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 1;
+}
+
+#xOutput::before {
+    content: "Output";
+}
+
+/* Ensure the content is above the watermark */
+#xAnalysis, #xD, #xOutput {
+    position: relative;
+    z-index: 2;
+}
+
+/* Adjustments for specific elements */
+#xAnalysis, #xD, #xOutput {
+    padding-right: 40px; /* Ensure content doesn't overlap with watermark */
+}
+
+
+/* Existing styles... */
+
+/* Default red state for specific fields */
+.field-container[data-field="withdrew"],
+.field-container[data-field="merchantCredit"],
+.field-container[data-field="duplicateClaim"],
+.field-container[data-field="pcUsedToFundOtherClaims"],
+.field-container[data-field="unusualDepositPriorToReporting"],
+.field-container[data-field="matchingAdjustment"],
+.field-container[data-field="claimsFiledLess1yr"],
+.field-container[data-field="immediateUseOfFunds"] {
+    background-color: var(--red-bg);
+}
+
+.field-container[data-field="withdrew"] .field-label,
+.field-container[data-field="merchantCredit"] .field-label,
+.field-container[data-field="duplicateClaim"] .field-label,
+.field-container[data-field="pcUsedToFundOtherClaims"] .field-label,
+.field-container[data-field="unusualDepositPriorToReporting"] .field-label,
+.field-container[data-field="matchingAdjustment"] .field-label,
+.field-container[data-field="claimsFiledLess1yr"] .field-label,
+.field-container[data-field="immediateUseOfFunds"] .field-label {
+    color: var(--red-text);
+}
+
+/* Green state for interacted fields */
+.field-container[data-field="withdrew"].interacted,
+.field-container[data-field="merchantCredit"].interacted,
+.field-container[data-field="duplicateClaim"].interacted,
+.field-container[data-field="pcUsedToFundOtherClaims"].interacted,
+.field-container[data-field="unusualDepositPriorToReporting"].interacted,
+.field-container[data-field="matchingAdjustment"].interacted,
+.field-container[data-field="claimsFiledLess1yr"].interacted,
+.field-container[data-field="immediateUseOfFunds"].interacted {
+    background-color: var(--green-bg);
+}
+
+#xResult > div.special-fields > div.field-container.special-field.interacted.red > div.label-container > span, #xResult > div.special-fields > div:nth-child(3), #xResult > div.special-fields > div:nth-child(2),#xResult > div.special-fields > div:nth-child(1){
+    color: var(--red-text)!important;
+    background-color: var(--red-bg)
+}
+
+.field-container[data-field="withdrew"].interacted .field-label,
+.field-container[data-field="merchantCredit"].interacted .field-label,
+.field-container[data-field="duplicateClaim"].interacted .field-label,
+.field-container[data-field="pcUsedToFundOtherClaims"].interacted .field-label,
+.field-container[data-field="unusualDepositPriorToReporting"].interacted .field-label,
+.field-container[data-field="matchingAdjustment"].interacted .field-label,
+.field-container[data-field="claimsFiledLess1yr"].interacted .field-label,
+.field-container[data-field="immediateUseOfFunds"].interacted .field-label {
+    color: var(--green-text);
+}
+
+.warning-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.warning-content {
+    background-color: var(--bg);
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 400px;
+    text-align: center;
+}
+
+.warning-content h2 {
+    color: var(--warning-text);
+    margin-bottom: 10px;
+}
+
+.warning-content ul {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.warning-content button {
+    margin: 0 10px;
+    padding: 5px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#confirmCopy {
+    background-color: var(--accent);
+    color: var(--bg);
+}
+
+#cancelCopy {
+    background-color: var(--red-bg);
+    color: var(--text);
+}
+
+.log-confirmation-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.popup-content {
+    background-color: var(--secondary);
+    padding: 20px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.popup-content button {
+    margin: 10px;
+    padding: 5px 15px;
+}
+
+.recent-claims-container {
+    background-color: var(--secondary);
+    border-radius: 12px;
+    margin:5px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    overflow-y: auto;
+  }
+  
+  .recent-claims-container h2 {
+    font-size: 1.2rem;
+    color: var(--accent);
+    border-bottom: 2px solid var(--accent);
+  }
+
+  #recentGrid{
+    display: grid;
+    grid-template-rows: 0.1fr 1.5fr;
+    padding:5px;
+  }
+  
+  .claims-list {
+    display: flex;
+    flex-direction: column;
+    gap:5px;
+  }
+  
+  .claim-item {
+    background-color: var(--primary);
+    border-radius: 8px;
+    padding: 6px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 12px;
+    align-items: center;
+    transition: background-color 0.3s ease;
+  }
+  
+  
+  .claim-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  
+  .claim-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .claim-number {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  
+  .claim-scenario {
+    font-size: 0.9rem;
+    color: var(--text);
+    opacity: 0.7;
+  }
+  
+  .claim-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+  }
+  
+  .claim-date, .claim-duration {
+    font-size: 0.8rem;
+    color: var(--text);
+    opacity: 0.6;
+  }
+
+  .copy-btn, .log-claim-btn {
+    position: relative;
+    padding-right: 40px; /* Make room for the shortcut hint */
+  }
+  
+  .shortcut-hint {
+    position: absolute;
+    right: 4px;
+    bottom: 0px;
+    font-size: 0.7em;
+    opacity: 0.7;
+    padding: 2px 4px;
+  }
+
+  .claim-archive-overlay {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.7);
+    backdrop-filter: blur(5px);
+}
+
+.claim-archive-panel {
+    background-color: var(--ca-bg-dark);
+    margin: 5% auto;
+    width: 90%;
+    max-width: 1000px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    animation: archivePanelFadeIn 0.3s;
+}
+
+@keyframes archivePanelFadeIn {
+    from { opacity: 0; transform: translateY(-50px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.claim-archive-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: var(--ca-bg-light);
+    border-radius: 8px 8px 0 0;
+}
+
+.claim-archive-header h2 {
+    color: var(--ca-text-primary);
+    font-size: 1.5rem;
+    margin: 0;
+}
+
+.claim-archive-close {
+    background: none;
+    border: none;
+    color: var(--ca-text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.claim-archive-close:hover {
+    color: var(--ca-text-primary);
+}
+
+.claim-archive-content {
+    max-height: 70vh;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+#claimArchiveList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.claim-archive-item {
+    background-color: var(--ca-bg-light);
+    border-radius: 8px;
+    padding: 15px;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.claim-archive-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+}
+
+.claim-archive-item h3 {
+    color: var(--ca-accent);
+    margin-top: 0;
+}
+
+.claim-archive-item p {
+    color: var(--ca-text-secondary);
+    margin: 5px 0;
+}
+
+.claim-archive-item details {
+    margin-top: 10px;
+}
+
+.claim-archive-item summary {
+    color: var(--ca-text-primary);
+    cursor: pointer;
+    user-select: none;
+}
+
+.claim-archive-item pre {
+    background-color: var(--ca-bg-dark);
+    border-radius: 4px;
+    padding: 10px;
+    overflow-x: auto;
+    color: var(--ca-text-secondary);
+    font-size: 0.9rem;
+}
+
+
+
+.account-number-field {
+    background-color: rgba(0, 178, 178, 0.1);
+    border-radius: 12px;
+    margin-bottom: 6px;
+}
+
+.account-number-container {
+    grid-column: 1 / -1;
+}
+
+.account-number-container .field-container {
+    background-color: rgba(0, 178, 178, 0.1);
+    border: transparent;
+}
+
+.click-to-paste-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    color: var(--text);
+    display: grid;
+    align-items: center;
+    cursor: pointer;
+    font-size: 25px;
+    backdrop-filter: blur(300px);
+    text-align: center;
+    z-index: 3;
+    border-radius: 12px;;
+}
+
+.regular-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+    margin-bottom: 5px;
+}
+
+.special-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background-color: var(--secondary);
+}
+
+.reset-btn {
+  position: absolute;
+  height: 20px;
+  right: 0;
+  margin:5px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.field-container {
+    font-size: 12px;
+    break-inside: avoid-column;
+    page-break-inside: avoid;
+    transition: background-color 0.5s ease, color 0.5s ease;
+    cursor: pointer;
+    position: relative;
+    padding: 5px;
+    border-radius: 8px;
+    min-width: 85px;
+    background-color: rgba(196, 196, 196, 0.1);
+}
+
+.field-label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 2px;
+    pointer-events: none;
+}
+
+.field-value {
+    background: transparent;
+    border: none;
+    width: 100%;
+    word-break: break-word;
+    display: block;
+    resize: none;
+    transition: background-color 0.3s ease;
+    color: inherit;
+    overflow: hidden;
+    height:12px;
+    line-height: 1; /* Adjust as needed */
+    pointer-events: none;
+}
+
+.field-container:focus-within .field-value {
+    pointer-events: auto;
+}
+
+/* This hidden checkbox will help us manage the focus state */
+.field-focus-control {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* When the hidden checkbox is checked, focus the input */
+.field-focus-control:checked + .field-value {
+    pointer-events: auto;
+}
+
+.field-focus-control:checked + .field-value:focus {
+    outline: none;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.field-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+}
+
+.field-container.regular-field.green {
+    background-color: var(--green-bg);
+}
+
+.field-container.regular-field.red {
+    background-color: var(--red-bg);
+}
+
+.field-container.regular-field.warning {
+    background-color: var(--warning-bg);
+}
+
+.field-container.green {
+    background-color: var(--green-bg) !important;
+}
+
+.field-container.red {
+    background-color: var(--red-bg) !important;
+}
+
+.field-container.warning {
+    background-color: var(--warning-bg) !important;
+}
+
+.field-container.green .field-label,
+.field-container.green .field-value {
+    color: var(--green-text);
+}
+
+.field-container.red .field-label,
+.field-container.red .field-value {
+    color: var(--red-text);
+}
+
+.field-container.warning .field-label,
+.field-container.warning .field-value {
+    color: var(--warning-text);
+}
+
+.field-container:hover,
+.field-container:focus-within,
+.field-container.special-field:hover {
+    background: var(--hover-bg);
+}
+
+.field-container.special-field {
+    background-color: var(--secondary);
+    transition: background-color 0.3s ease;
+    max-height: 85px;
+    display: grid;
+    padding: 5px;
+    gap: 0px;
+    overflow-y: hidden;
+}
+
+.field-container.special-field.green {
+    background-color: var(--green-bg);
+}
+
+.field-container.special-field.red {
+    background-color: var(--red-bg);
+}
+
+.field-container.special-field .label-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.field-container.special-field .buttons-container,
+.field-container.special-field .secondary-buttons {
+    display: grid;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.field-container.special-field .secondary-buttons {
+    display: none;
+}
+
+.field-container.special-field .details-input {
+    display: none;
+    margin-top: 5px;
+    width: 100%;
+    background-color: var(--input-bg);
+    color: var(--text);
+    border: transparent;
+    padding: 5px;
+    border-radius:10px;
+}
+
+.field-container textarea.field-value {
+    width: 100%;
+    overflow-y: auto;
+}
+
+.field-container.special-field button {
+    background-color: var(--button-bg);
+    color: var(--text);
+    border: transparent;
+    transition: all 0.3s ease;
+    padding: 2px 10px;
+    font-size: 12px;
+    height: 24px;
+    line-height: 24px;
+}
+
+.field-container.special-field button.selected {
+    background-color: var(--selected-button-bg);
+    color: white;
+    border-color: var(--selected-button-border);
+}
+
+.title-bar {
+    max-height: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 15px 15px 0 0;
+    color: var(--accent);
+    font-weight: bold;
+    padding-top: 5px;
+    margin-bottom:5px;
+    z-index: 3;
+    background-color: var(--primary);
+    font-size: 20px;
+}
+
+button {
+    padding: 0 20px;
+    background-color: var(--secondary);
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+    transition: 0.2s ease-out;
+    height: 30px;
+    line-height: 30px;
+    border-radius: 9px;
+    opacity: 0.9;
+    position: inherit;
+}
+
+button:hover {
+    opacity: 1;
+    background-color: var(--accent);
+}
+
+button:active {
+    background-color: var(--accent);
+}
+
+/*Analyzer*/
+.content.result-wrapper{
+    display: grid;
+    grid-template-rows: 0.1fr 1fr 1fr;
+    gap: 5px;
+    height: 100%;
+    overflow-y: auto;
+    width:100%;
+    padding:5px;
+}
+
+#xAnalysis{
+    resize: none;
+    overflow-y: auto;
+    background-color: var(--secondary);
+    border: none;
+    color: var(--text);
+    padding: 10px;
+    border-radius: 12px;
+    width: 100%;
+    min-height:200px;
+}
+
+.analysis-container {
+    overflow-y: auto;
+    position: relative;
+    display: grid;
+    height:100%;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+    width: 100%;
+    padding:5px;
+    background-color: var(--primary);
+    border-radius: 12px;
+    min-height:200px;
+}
+
+.analysis-field-container {
+    display: grid;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px;
+    background-color: rgba(196, 196, 196, 0.1);
+    border-radius: 12px;
+    transition: background-color 0.3s;
+}
+
+.question-text {
+    margin-right: 10px;
+}
+
+.answer-input {
+    flex: 1;
+    padding: 5px;
+    border: transparent;
+    border-radius: 12px;
+    max-width: 100px;
+}
+
+.toggle-button {
+    padding: 5px 12px;
+    background-color: #f0f0f0;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.analysis-field-container.not-needed .answer-input,
+.analysis-field-container.more-info .answer-input {
+    display: none;
+}
+
+.analysis-field-container.more-info {
+    background-color: var(--warning-bg);
+    color: var(--warning-text);
+}
+.analysis-field-container.has-value {
+    background-color: var(--green-bg);
+    color: var(--green-text);
+}
+
+.analysis-field-container.has-value.more-info {
+    background-color: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+#selectAllContainer {
+    position: relative;
+    z-index: 10;
+}
+
+#selectAll{
+    width:100%;
+}
+
+#selectAllActions button {
+    padding: 5px 10px;
+    cursor: pointer;
+    width:100%!important;
+}
+
+.analysis-field-container {
+    transition: all 0.3s ease;
+}
+
+.analysis-field-container.not-needed {
+    background-color: var(--not-needed-bg);
+    color: var(--not-needed-text);
+    text-decoration: line-through;
+}
+
+.analysis-field-container.not-needed .answer-input {
+    display: none;
+}
+
+.analysis-field-container:active {
+    transform: scale(0.98);
+}
+
+.analysis-field-container.f.red,
+.analysis-field-container.f.green {
+    cursor: pointer;
+}
+
+.analysis-field-container.f.red {
+    background-color: var(--red-bg);
+    color: var(--red-text);
+}
+
+.analysis-field-container.f.green {
+    background-color: var(--green-bg);
+    color: var(--green-text);
+}
+
+.fraud-field-container {
+    margin-top: 5px;
+}
+
+.fraud-input {
+    margin-top: 5px;
+    width: 100%;
+    padding: 5px;
+    border: transparent;
+    border-radius: 8px;
+    background-color: var(--input-bg);
+    color: var(--text);
+}
+
+.answer-input{
+    margin-top: 5px;
+    width: 100%;
+    padding: 5px;
+    border: transparent;
+    border-radius: 8px;
+    background-color: var(--input-bg);
+    color: var(--text);
+}
+
+.analysis-field-container.f.placeholder {
+    background-color: #808080;
+    color: #ffffff;
+    opacity: 0.7;
+}
+
+.analysis-field-container.f.placeholder .fraud-input {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}
+/**/
+
+#logs-popup {
+    display: none;
+}
+
+/*Decision*/
+
+#xD, .box .notepad{
+    resize: none;
+    overflow-y: auto;
+    background-color: var(--secondary);
+    border: none;
+    color: var(--text);
+    padding: 20px;
+    width: 100%;
+    border-radius:12px;
+}
+
+#notings{
+    padding:5px!important;
+    width:100%;
+}
+
+.title-bar #bigsteppers {
+    display: flex;
+}
+
+#bigsteppers button {
+    font-size: 12px;
+    opacity: 1;
+    border: none;
+    font-weight: bold;
+    border-radius: 10px;
+    background-color: #4a4a4a;
+    color: white;
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.3s, transform 0.1s;
+    padding: 0px 10px;
+}
+
+#bigsteppers button:hover {
+    transform: translateY(-1px);
+}
+
+#bigsteppers button:active {
+    transform: translateY(0);
+}
+
+.button-container {
+    display: grid;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+textarea:focus {
+    outline: transparent;
+  }
+  
+.step-indicator {
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    color: #333;
+    opacity: 0;
+    font-size: 8px;
+    border-radius: 8px;
+    font-weight: bold;
+    height: 20px;
+    width: auto;
+    padding: 0 10px;
+    background-color: #00B2B2;
+}
+/*END OF DECISION*/
+
+/*START OF OUTPUT! SAWAKAS*/
+#xOutput {
+    background-color: var(--not-needed-bg);
+    border-radius: 12px;
+    opacity: 1;
+    display: block;
+    color: var(--text);
+    padding: 20px; /* Add some padding */
+    overflow: auto; /* In case content exceeds the container */
+    font-family:Verdana;
+    outline: transparent;
+    z-index: 1;
+    border: solid 5px var(--secondary);
+}
+
+h2,h1 {
+    text-decoration: underline;
+    color:rgb(102, 102, 102);
+    font-size:small;
+    margin-bottom: 5px;
+  }
+
+  h3 {
+    color:rgb(102, 102, 102);
+    font-size:small;
+    margin-bottom: 0px;
+  }
+
+</style>
+
+<div id="logs-popup" class="popup"><button class="close-popup">Close</button><div class="popup-content"><h2>All Logs</h2><p>Logs content goes here...</p></div></div><button id="fillButton" hidden>Test Fill</button> <button id="fill2Button" hidden>Test Fill 2</button><div id="intro-container" class="intro-container"><div id="intro-text" class="intro-text">こんにちは</div><div id="signature" class="signature">SAIS by Wilmer</div><div class="skip-intro">Press any key to skip</div></div><div id="claimArchiveOverlay" class="claim-archive-overlay"><div class="claim-archive-panel"><header class="claim-archive-header"><h2>Claim Archive</h2><button class="claim-archive-close">&times;</button></header><div class="claim-archive-content"><div id="claimArchiveList"></div></div></div></div><div id="clearAllModal" class="modal"><div class="modal-content"><h2>Confirm Clear All</h2><p>Are you sure you want to clear everything? This action cannot be undone.</p><button id="confirmClear">Confirm</button> <button id="cancelClear">Cancel</button></div></div><div id="editModal" class="modal"><div class="modal-content"><h2>Edit Button</h2><div class="input-container"><input id="buttonTitle" placeholder="Button Title" maxlength="10"> <span id="charCount">0/10</span></div><textarea id="buttonContent" placeholder="Prefill Content"></textarea> <select id="buttonColor"><option value="var(--red-bg)">Red</option><option value="var(--green-bg)">Green</option><option value="var(--warning-bg)">Orange</option><option value="var(--secondary)">Gray</option><option value="black">Black</option></select> <select id="targetArea"><option value="xAnalysis">Findings</option><option value="xD">Decision</option><option value="xOutput">Output</option></select> <button id="saveButton">Save</button> <button id="closeModal">Close</button></div></div></head><body><div class="container"><div class="main"><div class="paralyser"><div id="clickToPasteOverlay" class="click-to-paste-overlay">Click to Paste CCS and CA</div><div class="box"><div class="content-wrapper"><button id="ClearAll">Clear All</button> <textarea id="xInput"></textarea><div id="xResult" class="result-grid"></div></div></div><div class="box"><div class="content result-wrapper"><div id="selectAllContainer" style="display: none;"><button id="selectAll">Select All</button><div id="selectAllActions" style="display: none;"><button id="selectNotNeeded">Not Needed</button> <button id="selectMoreInfo">More Info</button> <button id="selectGreenFlags" style="display: none;">Green</button> <button id="selectBack">Back</button></div></div><textarea id="xAnalysis"></textarea></div></div></div><div class="box" id="Decisionings"><textarea id="xD" placeholder="Enter your decision and conclusion here..."></textarea><div class="title-bar"><span class="title"></span><div id="bigsteppers" class="button-container"><button class="button" data-action="MI" style="background-color: var(--warning-bg); color:var(--warning-text);">More Info<span class="step-indicator" style="background-color: #ba9ce0;">Step 3</span></button> <button class="button" data-action="CI" style="background-color: var(--red-bg); color: var(--red-text);">Claim Invalid<span class="step-indicator" style="background-color: #ba9ce0;">Step 3</span></button> <button class="button" data-action="CV" style="background-color: var(--green-bg); color:var(--green-text);">Claim Valid<span class="step-indicator" style="background-color: #ba9ce0;">Step 3</span></button> <button id="resetButton" style="display: none;">↻</button> <button class="button" data-action="RE" style="background-color: var(--warning-bg); color:var(--warning-text);">Rework <span class="step-indicator" style="background-color: #4a9be6;">Step 4</span></button> <button class="button" data-action="AP" style="background-color: var(--green-bg); color:var(--green-text);">Approve <span class="step-indicator" style="background-color: #4a9be6;">Step 4</span></button> <button class="button" data-action="CC" style="background-color: var(--red-bg); color: var(--red-text);">Close <span class="step-indicator" style="background-color: #69e6d5;">Step 5</span></button> <button class="button" data-action="FI" style="background-color: var(--green-bg); color:var(--green-text);">To be Finalized <span class="step-indicator" style="background-color: #69e6d5;">Step 5</span></button></div></div></div><shrt-buttons class="box"><sbbox><sb1r><button class="shortcut-btn" data-shortcut="Alt+1">Alt+1</button> <button class="shortcut-btn" data-shortcut="Alt+2">Alt+2</button> <button class="shortcut-btn" data-shortcut="Alt+3">Alt+3</button> <button class="shortcut-btn" data-shortcut="Alt+4">Alt+4</button></sb1r><sb2r><button class="shortcut-btn" data-shortcut="Alt+Q">Alt+Q</button> <button class="shortcut-btn" data-shortcut="Alt+W">Alt+W</button> <button class="shortcut-btn" data-shortcut="Alt+E">Alt+E</button> <button class="shortcut-btn" data-shortcut="Alt+R">Alt+R</button></sb2r></sbbox><button id="gear">⚙️</button></shrt-buttons></div><div class="middle"><div class="box" id="timerrs"><button id="timer">00:00</button></div><div id="xOutput" contenteditable="true"><h1 contenteditable="false">IM Working on CCS Approvals</h1><br><h2 contenteditable="false">Step 1: Assessment</h2><div id="step1Content"></div><br><h2 contenteditable="false">Step 2: Findings</h2><div id="step2Content"></div><br><h2 contenteditable="false">Step 3: Decision</h2><div id="step3Content"></div><br><h2 contenteditable="false">Step 4: Claim Resolution Action</h2><div id="step4Content"></div><br><h2 contenteditable="false">Step 5: Next steps (If applicable)</h2><div id="step5Content"></div></div><lower-output class="box"><button id="copyButton" class="copy-btn" title="Copy (Alt+C)"><span class="copy-text">Copy</span> <span class="shortcut-hint">Alt+C</span></button> <button id="logClaimButton" class="log-claim-btn" title="Log Claim (Alt+S)"><span class="button-text">Next</span> <span class="shortcut-hint">Alt+S</span></button></lower-output></div><div class="utilities"><div class="box" id="recentGrid"><button id="ShowClaims">Show All Claims</button><div id="recent-claims" class="recent-claims-container"><div class="claims-list"></div></div></div><div class="box" id="notings"><div class="content-container"><div id="notepad-view"><div class="notepad-controls"><button class="format-btn" data-format="bold"><b>B</b></button> <button class="format-btn" data-format="italic"><i>I</i></button> <button class="format-btn" data-format="underline"><u>U</u></button></div><div id="notepad" contenteditable="true"></div></div><div id="calculator-view" style="display: none;"><div id="calc-display">0</div><div class="calc-buttons"><button class="calc-btn" data-action="clear">C</button> <button class="calc-btn" data-action="delete">DEL</button> <button class="calc-btn" data-action="operator" data-operator="/">÷</button> <button class="calc-btn" data-action="operator" data-operator="*">x</button> <button class="calc-btn" data-action="digit" data-digit="7">7</button> <button class="calc-btn" data-action="digit" data-digit="8">8</button> <button class="calc-btn" data-action="digit" data-digit="9">9</button> <button class="calc-btn" data-action="operator" data-operator="-">-</button> <button class="calc-btn" data-action="digit" data-digit="4">4</button> <button class="calc-btn" data-action="digit" data-digit="5">5</button> <button class="calc-btn" data-action="digit" data-digit="6">6</button> <button class="calc-btn" data-action="operator" data-operator="+">+</button> <button class="calc-btn" data-action="digit" data-digit="1">1</button> <button class="calc-btn" data-action="digit" data-digit="2">2</button> <button class="calc-btn" data-action="digit" data-digit="3">3</button> <button class="calc-btn" data-action="equals">=</button> <button class="calc-btn" data-action="digit" data-digit="0">0</button> <button class="calc-btn" data-action="decimal">.</button></div></div></div><div class="tab-container"><button class="tab-button active" data-tab="notepad">📝</button> <button class="tab-button" data-tab="calculator">🔢</button></div></div><div class="box"><div id="timerSegments"><button id="timer.break" data-duration="900">Break (Not working yet)</button> <button id="timer.lunch" data-duration="3600">Lunch (Not working yet)</button></div></div></div></div><script>// Timer functionality
+const timerElement = document.getElementById('timer');
+const logClaimButton = document.getElementById('log-claim');
+const xInput = document.getElementById('xInput');
+const clickToPasteOverlay = document.getElementById('clickToPasteOverlay');
+
+let timerInterval, seconds = 0;
+const maxSeconds = 7 * 60; // 7 minutes
+let isPaused = false;
+let targetSeconds; 
+let timerType;
+
+function startTimer() {
+    if (!timerInterval) {
+        timerInterval = setInterval(updateTimer, 1000);
+        timerElement.classList.add('active');
+        timerElement.classList.remove('paused');
+        isPaused = false;
+    }
+}
+
+function pauseTimer() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    timerElement.classList.remove('active');
+    timerElement.classList.add('paused');
+    isPaused = true;
+}
+
+function stopTimer() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    seconds = 0;
+    timerElement.textContent = '00:00';
+    timerElement.style.background = 'none';
+    timerElement.style.color = 'var(--text)';
+    timerElement.classList.remove('active', 'paused');
+    isPaused = false;
+}
+
+function updateTimer() {
+    if (!isPaused) {
+        seconds++;
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        timerElement.textContent = `${padZero(minutes)}:${padZero(remainingSeconds)}`;
+
+        const progress = (seconds / maxSeconds) * 100;
+
+        let gradientColor = '#90EE90'; // Light Green (initial color)
+        if (progress > 60) {
+            gradientColor = '#FFFF00'; // Yellow (from 60% to 100%)
+        }
+        if (seconds >= maxSeconds) {
+            gradientColor = '#FF0000'; // Red (at 100%)
+        }
+
+        timerElement.style.background = `linear-gradient(to right, ${gradientColor}, ${gradientColor} ${progress}%, var(--secondary) ${progress}%)`;
+        timerElement.style.boxShadow = `0 0 10px ${gradientColor}`;
+        timerElement.style.borderColor = gradientColor;
+
+        // Pulse animation every 5 seconds
+        if (seconds % 60 === 0) {
+            timerElement.classList.add('pulse');
+            setTimeout(() => {
+                timerElement.classList.remove('pulse');
+            }, 1000);
+        }
+    }
+}
+
+function padZero(num) {
+    return num.toString().padStart(2, '0');
+}
+
+// Event Listeners
+clickToPasteOverlay.addEventListener('click', startTimer);
+
+xInput.addEventListener('input', () => {
+    if (xInput.value.trim() !== '') {
+        startTimer();
+    }
+});
+
+timerElement.addEventListener('click', () => {
+    if (timerInterval) {
+        pauseTimer();
+    } else if (isPaused) {
+        startTimer();
+    } else {
+        startTimer();
+    }
+});
+
+// Add this to your existing CSS
+const style = document.createElement('style');
+style.textContent = `
+    #timer {
+        transition: background 0.3s, box-shadow 0.3s, color 0.3s;
+    }
+    #timer.active {
+        color: var(--bg);
+    }
+    #timer.paused {
+        opacity: 0.7;
+    }
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    #timer.pulse {
+        animation: pulse 0.5s ease-in-out;
+    }
+`;
+document.head.appendChild(style);
+
+
+//THIS IS FOR THE NOTEPAD/CAL
+document.addEventListener('DOMContentLoaded', () => {
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const notepadView = document.getElementById('notepad-view');
+    const calculatorView = document.getElementById('calculator-view');
+    const formatButtons = document.querySelectorAll('.format-btn');
+    const saveButton = document.getElementById('save-note');
+    const notepad = document.getElementById('notepad');
+    const calcDisplay = document.getElementById('calc-display');
+    const calcButtons = document.querySelectorAll('.calc-btn');
+
+    let currentCalc = '';
+    let lastResult = '';
+
+    // Tab switching
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const tabName = button.getAttribute('data-tab');
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+
+            if (tabName === 'notepad') {
+                notepadView.style.display = 'flex';
+                calculatorView.style.display = 'none';
+            } else {
+                notepadView.style.display = 'none';
+                calculatorView.style.display = 'flex';
+            }
+        });
+    });
+
+    // Notepad formatting
+    formatButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            document.execCommand(button.getAttribute('data-format'), false, null);
+        });
+    });
+
+    // Calculator logic
+    function updateDisplay() {
+        calcDisplay.textContent = currentCalc || '0';
+    }
+
+    function handleDigit(digit) {
+        if (lastResult !== '') {
+            currentCalc = '';
+            lastResult = '';
+        }
+        currentCalc += digit;
+        updateDisplay();
+    }
+
+    function handleOperator(operator) {
+        if (lastResult !== '') {
+            currentCalc = lastResult;
+            lastResult = '';
+        }
+        if (currentCalc === '' && operator !== '-') return;
+        if ("+-*/".includes(currentCalc.slice(-1)) && operator !== '-') {
+            currentCalc = currentCalc.slice(0, -1);
+        }
+        currentCalc += operator;
+        updateDisplay();
+    }
+
+    function handleEquals() {
+        if (currentCalc === '') return;
+        try {
+            lastResult = eval(currentCalc).toString();
+            currentCalc = lastResult;
+        } catch (error) {
+            currentCalc = 'Error';
+        }
+        updateDisplay();
+    }
+
+    function handleClear() {
+        currentCalc = '';
+        lastResult = '';
+        updateDisplay();
+    }
+
+    function handleDelete() {
+        currentCalc = currentCalc.slice(0, -1);
+        updateDisplay();
+    }
+
+    function handleDecimal() {
+        if (lastResult !== '') {
+            currentCalc = '0';
+            lastResult = '';
+        }
+        if (!currentCalc.includes('.')) {
+            currentCalc += currentCalc === '' ? '0.' : '.';
+            updateDisplay();
+        }
+    }
+
+    calcButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const action = button.getAttribute('data-action');
+            switch (action) {
+                case 'digit':
+                    handleDigit(button.getAttribute('data-digit'));
+                    break;
+                case 'operator':
+                    handleOperator(button.getAttribute('data-operator'));
+                    break;
+                case 'equals':
+                    handleEquals();
+                    break;
+                case 'clear':
+                    handleClear();
+                    break;
+                case 'delete':
+                    handleDelete();
+                    break;
+                case 'decimal':
+                    handleDecimal();
+                    break;
+            }
+        });
+    });
+
+    // Handle keyboard input for calculator
+    document.addEventListener('keydown', (event) => {
+        if (calculatorView.style.display !== 'none') {
+            const key = event.key;
+            if (/[0-9]/.test(key)) {
+                handleDigit(key);
+            } else if (['+', '-', '*', '/'].includes(key)) {
+                handleOperator(key);
+            } else if (key === 'Enter' || key === '=') {
+                handleEquals();
+                event.preventDefault(); // Prevent form submission
+            } else if (key === 'Escape') {
+                handleClear();
+            } else if (key === 'Backspace') {
+                handleDelete();
+            } else if (key === '.') {
+                handleDecimal();
+            }
+        }
+    });
+});
+
+// Notepad functionality with localStorage
+document.addEventListener('DOMContentLoaded', () => {
+    const notepad = document.getElementById("notepad");
+    const placeholderText = "You can have your personal notes here (notes will be saved unless you clear cache)...";
+
+    // Load saved content from localStorage
+    function loadSavedContent() {
+        const savedContent = localStorage.getItem('notepadContent');
+        if (savedContent) {
+            notepad.innerHTML = savedContent;
+            notepad.classList.remove("placeholder");
+        } else {
+            setPlaceholder();
+        }
+    }
+
+    // Save content to localStorage
+    function saveContent() {
+        if (notepad.textContent !== placeholderText) {
+            localStorage.setItem('notepadContent', notepad.innerHTML);
+        }
+    }
+
+    // Set the placeholder when the div is empty and not focused
+    function setPlaceholder() {
+        if (notepad.textContent === "") {
+            notepad.textContent = placeholderText;
+            notepad.classList.add("placeholder");
+        }
+    }
+
+    // Remove the placeholder when the div is focused or has content
+    function removePlaceholder() {
+        if (notepad.textContent === placeholderText) {
+            notepad.textContent = "";
+        }
+        notepad.classList.remove("placeholder");
+    }
+
+    // Event listeners
+    notepad.addEventListener("focus", removePlaceholder);
+    notepad.addEventListener("blur", () => {
+        setPlaceholder();
+        saveContent();
+    });
+    notepad.addEventListener("input", () => {
+        if (notepad.textContent !== "") {
+            notepad.classList.remove("placeholder");
+        }
+        saveContent();
+    });
+
+    // Load saved content when the page loads
+    loadSavedContent();
+
+    // Save content periodically (every 5 seconds)
+    setInterval(saveContent, 5000);
+});
+//END OF NOTEPADCAL
+
+
+// SHORTCUTBUTTONS
+
+class ShortcutButtonManager {
+    constructor() {
+        this.buttons = document.querySelectorAll('.shortcut-btn');
+        this.gearButton = document.getElementById('gear');
+        this.modal = document.getElementById('editModal');
+        this.saveButton = document.getElementById('saveButton');
+        this.closeButton = document.getElementById('closeModal');
+        this.currentButton = null;
+        this.charCount = document.getElementById('charCount');
+        this.buttonTitle = document.getElementById('buttonTitle');
+
+        this.setupEventListeners();
+        this.loadButtonConfigurations();
+    }
+
+    setupEventListeners() {
+        this.buttons.forEach(button => {
+            button.addEventListener('click', () => this.handleButtonClick(button));
+        });
+
+        this.gearButton.addEventListener('click', () => this.toggleEditMode());
+        this.saveButton.addEventListener('click', () => this.saveButtonSettings());
+        this.closeButton.addEventListener('click', () => this.closeModal());
+
+        document.addEventListener('keydown', (e) => this.handleKeyboardShortcut(e));
+
+        this.buttonTitle.addEventListener('input', () => this.updateCharCount());
+    }
+
+    updateCharCount() {
+        const currentLength = this.buttonTitle.value.length;
+        this.charCount.textContent = `${currentLength}/10`;
+    }
+
+    handleButtonClick(button) {
+        if (this.isEditMode) {
+            this.openModal(button);
+        } else {
+            this.triggerButtonAction(button);
+        }
+    }
+
+    toggleEditMode() {
+        this.isEditMode = !this.isEditMode;
+        this.gearButton.textContent = this.isEditMode ? '✅' : '⚙️';
+    }
+
+    openModal(button) {
+        this.currentButton = button;
+        this.buttonTitle.value = button.textContent.trim().slice(0, 10);
+        document.getElementById('buttonContent').value = button.dataset.content || '';
+        document.getElementById('buttonColor').value = button.dataset.color || 'white';
+        document.getElementById('targetArea').value = button.dataset.target || 'xAnalysis';
+        this.updateCharCount();
+        this.modal.style.display = 'block';
+    }
+
+    saveButtonSettings() {
+        const title = this.buttonTitle.value.trim().slice(0, 10);
+        const content = document.getElementById('buttonContent').value;
+        const color = document.getElementById('buttonColor').value;
+        const target = document.getElementById('targetArea').value;
+
+        this.currentButton.textContent = title + ' ';
+        this.currentButton.dataset.content = content;
+        this.currentButton.dataset.color = color;
+        this.currentButton.dataset.target = target;
+        this.currentButton.style.backgroundColor = color;
+        this.currentButton.style.color = ['black', 'white'].includes(color) ? 'black' : 'white';
+
+        this.saveButtonConfigurations();
+        this.closeModal();
+    }
+
+    closeModal() {
+        this.modal.style.display = 'none';
+    }
+
+    handleKeyboardShortcut(e) {
+        if (e.altKey) {
+            const key = e.key.toUpperCase();
+            const button = document.querySelector(`[data-shortcut="Alt+${key}"]`);
+            if (button) {
+                e.preventDefault();
+                this.triggerButtonAction(button);
+            }
+        }
+    }
+
+    triggerButtonAction(button) {
+        const content = button.dataset.content;
+        const target = button.dataset.target;
+        if (content && target) {
+            const targetElement = document.getElementById(target);
+            if (targetElement) {
+                if (target === 'xOutput') {
+                    targetElement.innerHTML += content;
+                } else {
+                    targetElement.value += content;
+                }
+            }
+        }
+    }
+
+    saveButtonConfigurations() {
+        const configurations = {};
+        this.buttons.forEach(button => {
+            configurations[button.dataset.shortcut] = {
+                title: button.textContent.trim(),
+                content: button.dataset.content,
+                color: button.dataset.color,
+                target: button.dataset.target
+            };
+        });
+        localStorage.setItem('shortcutButtonConfigurations', JSON.stringify(configurations));
+    }
+
+    loadButtonConfigurations() {
+    const savedConfigurations = localStorage.getItem('shortcutButtonConfigurations');
+    if (savedConfigurations) {
+        const configurations = JSON.parse(savedConfigurations);
+        this.buttons.forEach(button => {
+            const config = configurations[button.dataset.shortcut];
+            if (config) {
+                button.textContent = config.title + ' ';
+                button.dataset.content = config.content;
+                button.dataset.color = config.color;
+                button.dataset.target = config.target;
+                button.style.backgroundColor = config.color;
+                
+                // Determine text color based on background color
+                switch(config.color) {
+                    case 'var(--red-bg)':
+                    button.style.color = 'var(--red-text)';
+                        break;
+                    case 'var(--green-bg)':
+                    button.style.color = 'var(--green-text)';
+                        break;
+                    case 'var(--warning-bg)':
+                    button.style.color = 'var(--warning-text)';
+                        break;
+                    case 'var(--secondary)':
+                    button.style.color = 'var(--text)';
+                        break;
+                        case 'Black':
+                    button.style.color = 'var(--text)';
+                        break;
+                        case 'Gray':
+                    button.style.color = 'var(--text)';
+                        break;
+                    default:
+                    button.style.color = 'var(--text)';
+                        break;
+                }
+            }
+        });
+    }
+}
+}
+
+// Initialize the ShortcutButtonManager when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new ShortcutButtonManager();
+});
+
+// END OF SHORTCUTBUTTONS
+//CLEAR ALL
+class ClearAllManager {
+    constructor() {
+        this.clearAllButton = document.getElementById('ClearAll');
+        this.clearAllModal = document.getElementById('clearAllModal');
+        this.confirmClearButton = document.getElementById('confirmClear');
+        this.cancelClearButton = document.getElementById('cancelClear');
+
+        this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+        this.clearAllButton.addEventListener('click', () => this.showClearAllModal());
+        this.confirmClearButton.addEventListener('click', () => this.clearAllAndReload());
+        this.cancelClearButton.addEventListener('click', () => this.hideClearAllModal());
+    }
+
+    showClearAllModal() {
+        this.clearAllModal.style.display = 'block';
+    }
+
+    hideClearAllModal() {
+        this.clearAllModal.style.display = 'none';
+    }
+
+    clearAllAndReload() {
+        // Clear all form inputs
+        document.querySelectorAll('input, textarea').forEach(el => {
+            el.value = '';
+        });
+
+        // Clear all contenteditable elements
+        document.querySelectorAll('[contenteditable]').forEach(el => {
+            el.innerHTML = '';
+        });
+
+        // Reset any custom state in your application
+        // For example, if you have any global state variables, reset them here
+
+        // Reload the page
+        window.location.reload();
+    }
+}
+
+// Initialize the ClearAllManager when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new ClearAllManager();
+});
+//CLEAR ALL
+
+//COPY
+class CopyManager {
+    constructor() {
+        this.hasClipboardPermission = localStorage.getItem('clipboardPermission') === 'granted';
+    }
+
+    async handleCopyClick(event) {
+        const button = event.currentTarget;
+        const content = document.getElementById('xOutput').innerHTML;
+
+        if (this.hasClipboardPermission) {
+            await this.copyToClipboard(content, button);
+        } else {
+            try {
+                await navigator.clipboard.writeText(content);
+                this.hasClipboardPermission = true;
+                localStorage.setItem('clipboardPermission', 'granted');
+                this.updateButtonState(button, true);
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+                this.updateButtonState(button, false);
+            }
+        }
+    }
+
+    async copyToClipboard(content, button) {
+        try {
+            await navigator.clipboard.writeText(content);
+            this.updateButtonState(button, true);
+        } catch (err) {
+            console.error('Failed to copy: ', err);
+            this.updateButtonState(button, false);
+        }
+    }
+
+    updateButtonState(button, success) {
+        const originalText = button.textContent;
+        button.textContent = success ? 'Copied!' : 'Failed to copy';
+        button.classList.toggle('copied', success);
+
+        setTimeout(() => {
+            button.textContent = originalText;
+            button.classList.remove('copied');
+        }, 2000);
+    }
+}
+
+// Initialize the CopyManager when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new CopyManager();
+});
+//COPY
+//bigsteps
+class BigSteppersManager {
+    constructor() {
+        this.elements = {
+            bigsteppers: document.getElementById('bigsteppers'),
+            xD: document.getElementById('xD'),
+            resetButton: document.getElementById('resetButton')
+        };
+        this.currentStep = 3;
+        this.prewrittenTexts = {
+            CV: `Step 3: Decision\nClaim is Valid\nPreliminary Investigation Complete:
+No grounds found to deny the claim. Evidence supports customer's assertion. Proceeding with standard claim processing.\n`,
+            CI: `Step 3: Decision\nClaim is Invalid\nInvestigation Conclusion:
+Significant inconsistencies found contradicting customer's assertion. Claim determined invalid. No Provisional Credit (PC) due.\n`,
+            MI: `Step 3: Decision\nAdditional Information Required
+Findings inconclusive due to insufficient data. Cannot determine claim validity. More documentation needed.
+
+Step 4: Claim Resolution Action
+Rework financials to Pend
+
+Step 5: Next steps
+Keep claim pending
+Sending more info needed letter`,
+            CC: "Step 5: Next steps\nClosing Claim",
+            FI: "Step 5: Next steps (If applicable)\nClaim will be Finalized on or before FRD.",
+            RE: "Step 4: Claim Resolution Action\nRework financials\n",
+            AP: "Step 4: Claim Resolution Action\nApproving financial action requested\n"
+        };
+
+        this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+        this.elements.bigsteppers.addEventListener('click', this.handleBigStepperClick.bind(this));
+        this.elements.resetButton.addEventListener('click', this.resetToStep3.bind(this));
+        this.showButtonsForStep(3);
+    }
+
+    handleBigStepperClick(event) {
+        const clickedButton = event.target.closest('.button');
+        if (!clickedButton) return;
+
+        const action = clickedButton.getAttribute('data-action');
+        this.insertText(action);
+
+        if (action !== 'MI') {
+            this.currentStep++;
+            if (this.currentStep <= 5) {
+                this.showButtonsForStep(this.currentStep);
+            }
+        }
+    }
+
+    showButtonsForStep(step) {
+        const buttons = this.elements.bigsteppers.querySelectorAll('.button');
+        buttons.forEach(button => {
+            const stepIndicator = button.querySelector('.step-indicator');
+            if (stepIndicator && stepIndicator.textContent.includes(`Step ${step}`)) {
+                button.style.display = 'inline-block';
+            } else {
+                button.style.display = 'none';
+            }
+        });
+
+        this.elements.resetButton.style.display = (step === 4 || step === 5) ? 'inline-block' : 'none';
+    }
+
+    insertText(type) {
+        const text = this.prewrittenTexts[type];
+        if (!text) return;
+
+        if (['CC', 'FI', 'RE', 'AP'].includes(type)) {
+            this.replaceOrAddStep(this.elements.xD, ['CC', 'FI'].includes(type) ? 5 : 4, text);
+        } else {
+            this.elements.xD.value = text;
+        }
+
+        // Trigger an input event to ensure any listeners are notified of the change
+        const inputEvent = new Event('input', { bubbles: true, cancelable: true });
+        this.elements.xD.dispatchEvent(inputEvent);
+    }
+
+    replaceOrAddStep(element, stepNumber, newText) {
+        const lines = element.value.split('\n');
+        const stepFound = lines.some((line, index) => {
+            if (line.startsWith(`Step ${stepNumber}:`)) {
+                lines.splice(index, 2, newText);
+                return true;
+            }
+            return false;
+        });
+
+        if (!stepFound) {
+            lines.push(newText);
+        }
+
+        element.value = lines.join('\n');
+    }
+
+    resetToStep3() {
+        this.currentStep = 3;
+        this.showButtonsForStep(3);
+        this.elements.xD.value = '';
+        
+        // Trigger an input event to ensure any listeners are notified of the change
+        const inputEvent = new Event('input', { bubbles: true, cancelable: true });
+        this.elements.xD.dispatchEvent(inputEvent);
+    }
+}
+
+// Initialize the BigSteppersManager when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+    window.bigSteppersManager = new BigSteppersManager();
+});
+//bigggue
+
+//COPY UPGRADE
+//THE SHOWALL MODAL
+class ClaimArchiveManager {
+    constructor() {
+        this.showArchiveButton = document.getElementById('ShowClaims');
+        this.archiveOverlay = document.getElementById('claimArchiveOverlay');
+        this.closeButton = this.archiveOverlay.querySelector('.claim-archive-close');
+        this.archiveList = document.getElementById('claimArchiveList');
+
+        this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+        this.showArchiveButton.addEventListener('click', () => this.showClaimArchive());
+        this.closeButton.addEventListener('click', () => this.closeArchive());
+        window.addEventListener('click', (event) => {
+            if (event.target === this.archiveOverlay) {
+                this.closeArchive();
+            }
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.archiveOverlay.style.display === 'block') {
+                this.closeArchive();
+            }
+        });
+    }
+
+    showClaimArchive() {
+    const allLogs = JSON.parse(localStorage.getItem('allClaimLogs') || '[]'); // Get all logs
+    // const logs = JSON.parse(localStorage.getItem('claimLogs') || '[]'); // No longer needed here
+
+    this.archiveList.innerHTML = allLogs.map(log => `
+        <div class="claim-archive-item">
+            <h3>${log.claimNumber}</h3>
+            <p><strong>Scenario:</strong> ${log.scenario}</p>
+            <p><strong>Date:</strong> ${new Date(log.timestamp).toLocaleString()}</p>
+            <p><strong>Duration:</strong> ${log.duration}</p>
+            <details>
+                <summary>View Details</summary>
+                <pre>${this.formatContent(log.content)}</pre>
+            </details>
+        </div>
+    `).join('');
+
+    this.archiveOverlay.style.display = 'block';
+    document.body.style.overflow = 'hidden'; // Prevent scrolling behind overlay
+}
+
+    closeArchive() {
+        this.archiveOverlay.style.display = 'none';
+        document.body.style.overflow = ''; // Restore scrolling
+    }
+
+    formatContent(content) {
+        // This method can be expanded to format the content more nicely
+        return content.replace(/\n/g, '<br>');
+    }
+}
+
+// Initialize the ClaimArchiveManager when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new ClaimArchiveManager();
+});
+
+
+// intro
+document.addEventListener('DOMContentLoaded', () => {
+    const i = document.getElementById('intro-container'),
+        t = document.getElementById('intro-text'),
+        d = 3200;
+
+    t.innerHTML = t.textContent.replace(/\S/g, "<span class='char'>$&</span>");
+    document.querySelectorAll('.char').forEach((c, j) => c.style.animationDelay = `${j * 100 + 500}ms`);
+
+    const e = (f = false) => {
+        if (f) document.querySelectorAll('.char,.signature').forEach(e => {
+            e.style.animationDelay = '0s';
+            e.style.animationDuration = '0.05s';
+        });
+
+        // Calculate 80% of the intro duration
+        const introEightyPercent = 0.7 * d;
+
+        // Start the container animation at 80% of the intro duration
+        setTimeout(() => {
+            var container = document.querySelector('.container');
+            container.style.opacity = 1;
+            container.style.transform = "scale(1)";
+        }, introEightyPercent);
+
+        // Fade out the intro after the full duration
+        setTimeout(() => {
+            i.style.opacity = '0';
+            setTimeout(() => {
+                i.style.display = 'none';
+                t.classList.add('shine');
+            }, 1000);
+        }, f ? 100 : d);
+    };
+
+    // Check if intro has been shown before
+    const hasSeenIntro = localStorage.getItem('hasSeenIntro');
+
+    if (!hasSeenIntro) {
+        document.addEventListener('keydown', () => e(true));
+        setTimeout(() => e(), d);
+
+        // Mark intro as seen
+        localStorage.setItem('hasSeenIntro', 'true');
+    } else {
+        // Skip intro if already seen
+        i.style.display = 'none';
+        var container = document.querySelector('.container');
+        container.style.opacity = 1;
+        container.style.transform = "scale(1)";
+    }
+});
+// intro</script><button id="colorSchemeToggle" style="position: fixed; top: 20px; right: 20px;">☀️</button><script>(()=>{function e(t){return e="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e},e(t)}!function(){"use strict";var t={296:function(t,n,i){function a(t){return a="function"==typeof Symbol&&"symbol"==e(Symbol.iterator)?function(t){return e(t)}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":e(t)},a(t)}function s(e){var t=function(e){if("object"!=a(e)||!e)return e;var t=e[Symbol.toPrimitive];if(void 0!==t){var n=t.call(e,"string");if("object"!=a(n))return n;throw new TypeError("@@toPrimitive must return a primitive value.")}return String(e)}(e);return"symbol"==a(t)?t:t+""}i.d(n,{h:function(){return r}});var r=function(){return e=function e(){!function(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}(this,e),this.analysisQuestions={DFDM:[{question:"Defect description?",notRequired:!1},{question:"Item purchased?",notRequired:!1},{question:"Estimated delivery date?",notRequired:!1},{question:"Return details?",notRequired:!1},{question:">16 days since return?",notRequired:!1}],MNRC:[{question:"Item purchased?",notRequired:!1},{question:"Estimated delivery date?",notRequired:!1},{question:"Received late & attempted return?",notRequired:!1},{question:"Cancellation date?",notRequired:!1},{question:"Cancellation reason?",notRequired:!1}],NADR:[{question:"Item & reason for NADR?",notRequired:!1},{question:"Expected service/delivery date?",notRequired:!1},{question:"Attempted resolution with merchant?",notRequired:!1},{question:"Cancellation/Return date?",notRequired:!1},{question:">16 days since return?",notRequired:!1}],SNRN:[{question:"Service purchased?",notRequired:!1},{question:"Expected service date?",notRequired:!1},{question:"Attempted resolution with merchant?",notRequired:!1},{question:"Cancellation date?",notRequired:!1},{question:"Cancellation reason?",notRequired:!1}],MRPT:[{question:"Purchase details?",notRequired:!1},{question:"Date merchant contacted?",notRequired:!1},{question:"Misrepresentation details?",notRequired:!1},{question:"Date received?",notRequired:!1},{question:"Date canceled/returned?",notRequired:!1},{question:"Agreed to future transactions?",notRequired:!1},{question:"7-day billing notification received?",notRequired:!1}],CNRX:[{question:"Cancellation date?",notRequired:!1},{question:"Cancellation reason?",notRequired:!1},{question:"Merchant contact details?",notRequired:!1}],CRNP:[{question:"Cancellation date?",notRequired:!1},{question:"Purchase description?",notRequired:!1},{question:"Expected/received date?",notRequired:!1},{question:"Return date?",notRequired:!1},{question:"Invoice/tracking number?",notRequired:!1},{question:"Attempted resolution with merchant?",notRequired:!1},{question:">16 days since return/cancellation?",notRequired:!1}],DPAD:[{question:" ",notRequired:!1}],DPST:[{question:"Legal line vs deposit amount mismatch?",notRequired:!1},{question:"EIV maker item match?",notRequired:!1},{question:"Deposit Review error confirmed?",notRequired:!1},{question:"TI error found?",notRequired:!1}],DPPR:[{question:"Ch can provide valid transation?",notRequired:!1},{question:"VROL supports duplicate processing?",notRequired:!1}],MIDP:[{question:"Deposit confirmed in Chase systems?",notRequired:!1},{question:"CMM check?",notRequired:!1},{question:"Valid deposit receipt provided?",notRequired:!1},{question:"TI error/sequence numbers?",notRequired:!1},{question:"Chip enabled deposit?",notRequired:!1},{question:"No irregular activity within same timeframe?",notRequired:!1}],OCHG:[{question:"Overcharge amount?",notRequired:!1},{question:"Transaction receipt w/ overcharge info?",notRequired:!1}],PBOM:[{question:"Chase-verified other payment?",notRequired:!1},{question:"Non-Chase payment proof in 10 days?",notRequired:!1},{question:"$500+ claim: signed statement in 10 days?",notRequired:!1}],SHFU:[{question:"TI error message?",notRequired:!1},{question:"Machine imbalance/funds not received?",notRequired:!1}],ATO:[{questionGreen:"Customer disputing all transactions performed on card that wasn't received (Excludes 522 or MOTO 2 transactions)",questionRed:"Customer not disputing all transactions performed on card that wasn't received (Excludes 522 or MOTO 2 transactions)",notRequired:!1},{questionGreen:"Invalid PIN attempts (i.e. N/A if PIN mailer sent)",questionRed:"No invalid PIN attempts (i.e. N/A if PIN mailer sent)",notRequired:!1},{questionGreen:"Out of pattern transactions: No history of valid transactions at same merchant location / terminal as disputed transactions or disputed transactions not similar in frequency and dollar amounts of customers previous valid transactions at same merchant location / terminal",questionRed:"Two or more undisputed transactions at same merchant location / terminal as disputed transactions for similar frequencies and dollar amounts",notRequired:!1},{questionGreen:"When disputed transaction recurring (i.e. code 522 or MOTO 2), related previous transactions also disputed",questionRed:"Transaction recurring (i.e. code 522 or MOTO 2) and previous transactions not being disputed",notRequired:!1},{questionGreen:"Recent changes to customer information (i.e. email, phone, address, etc.)",questionRed:"No recent changes to customer information (i.e. email, phone, address, etc.)",notRequired:!1},{questionGreen:"Third party fraud indicators present.",questionRed:null,notRequired:!1},{questionGreen:null,questionRed:"FPF indicators present",notRequired:!1},{questionGreen:"Transactions attempted after card closure",questionRed:null,notRequired:!1},{questionGreen:"Card mailed to alternative address",questionRed:null,notRequired:!1}],TPI:[{questionGreen:"Customer tricked into giving account info/access (e.g., ATM, debit card) \nSomeone else used the info to make transactions \nCustomer didn't approve transactions \nCustomer didn't receive benefit",questionRed:"Customer benefited from the transactions \nCustomer made the transactions themselves",notRequired:!1}],Counterfeit:[{questionGreen:"Out of pattern transactions: No history of valid transactions at the same merchant location / terminal of disputed transactions OR disputed transactions not similar in frequency and dollar amounts of customers' previous valid transactions at the same merchant location / terminal",questionRed:"Two or more undisputed transactions at the same merchant location / terminal as disputed transactions for similar frequencies and dollar amounts",notRequired:!1},{questionGreen:"TASER NG shows customer confirmed transaction fraud",questionRed:"TASER NG shows customer confirmed transaction valid",notRequired:!1},{questionGreen:"Disputed transaction recurring (i.e., code 522 or MOTO 2) and related previous transactions also disputed",questionRed:"Disputed transaction recurring (i.e., code 522 or MOTO 2) and related previous transactions not disputed",notRequired:!1},{questionGreen:"Transaction at chip-enabled ATM/merchant terminal where TI shows fallback transaction",questionRed:"Transaction at chip-enabled ATM/merchant terminal where TI does not show fallback transaction",notRequired:!1},{questionGreen:"Transaction conducted outside of the customer's geographic area or current transacting area",questionRed:"Transactions conducted within the geographical area",notRequired:!1},{questionGreen:"Chip-enabled card only: \n• Used at a chip-enabled ATM terminal (i.e., can't be a fallback transaction) \n• Used with PIN-based transactions (e.g., 543, 515 transaction codes) ",questionRed:"Chip enabled card only: \n• Abnormal deposits fund disputed transactions \n• The following can be used to support chip-enabled card Red Flag: \n• PIN used to conduct transactions \n• ZIP Code entered at the time of purchase for authentication (AVS) \n• Contactless Chip POS 07 transactions treated as card-present, EMV-enabled transactions",notRequired:!1}],"Lost card":[{questionGreen:"Out of pattern transactions: No history of valid transactions at the same merchant location / terminal of disputed transactions OR disputed transactions not similar in frequency and dollar amounts of customers' previous valid transactions at the same merchant location / terminal",questionRed:"Two or more undisputed transactions at the same merchant location / terminal as disputed transactions for similar frequencies and dollar amounts",notRequired:!1},{questionGreen:"Invalid PIN attempts (i.e., N/A if the PIN was carried with the card)",questionRed:"No invalid PIN attempts (i.e., N/A if the PIN was carried with the card)",notRequired:!1},{questionGreen:"TASER NG shows customer confirmed transaction fraud",questionRed:"TASER NG shows customer confirmed transaction valid",notRequired:!1},{questionGreen:"Customer disputing all card-present transactions performed after the first disputed transaction",questionRed:"Customer not disputing all card-present transactions performed after the first disputed transaction",notRequired:!1},{questionGreen:"Disputed transaction recurring (i.e., code 522 or MOTO 2) and related previous transactions also disputed",questionRed:"Disputed transaction recurring (i.e., code 522 or MOTO 2) and related previous transactions not disputed",notRequired:!1},{questionGreen:"Card present transactions attempted after card closure",questionRed:null,notRequired:!1},{questionGreen:null,questionRed:"Abnormal deposits fund disputed transactions",notRequired:!1},{questionGreen:"Third-party fraud indicators present",questionRed:null,notRequired:!1},{questionGreen:null,questionRed:"FPF indicators present",notRequired:!1}],"Stolen card":[{questionGreen:"Out of pattern transactions: No history of valid transactions at the same merchant location / terminal of disputed transactions OR disputed transactions not similar in frequency and dollar amounts of customers' previous valid transactions at the same merchant location / terminal",questionRed:"Two or more undisputed transactions at the same merchant location / terminal as disputed transactions for similar frequencies and dollar amounts",notRequired:!1},{questionGreen:"Invalid PIN attempts (i.e., N/A if the PIN was carried with the card)",questionRed:"No invalid PIN attempts (i.e., N/A if the PIN was carried with the card)",notRequired:!1},{questionGreen:"TASER NG shows customer confirmed transaction fraud",questionRed:"TASER NG shows customer confirmed transaction valid",notRequired:!1},{questionGreen:"Customer disputing all card-present transactions performed after the first disputed transaction",questionRed:"Customer not disputing all card-present transactions performed after the first disputed transaction",notRequired:!1},{questionGreen:"Disputed transaction recurring (i.e., code 522 or MOTO 2) and related previous transactions also disputed",questionRed:"Disputed transaction recurring (i.e., code 522 or MOTO 2) and related previous transactions not disputed",notRequired:!1},{questionGreen:"Card present transactions attempted after card closure",questionRed:null,notRequired:!1},{questionGreen:null,questionRed:"Abnormal deposits fund disputed transactions",notRequired:!1},{questionGreen:"Third-party fraud indicators present",questionRed:null,notRequired:!1},{questionGreen:null,questionRed:"FPF indicators present",notRequired:!1}],"Lst/Stl Dgtl":[{questionGreen:"New devices recently added to the online profile",questionRed:"No new devices recently added to the online profile",notRequired:!1},{questionGreen:"Password change/demographic changes before unauthorized activity",questionRed:"No password change/demographic changes before unauthorized activity",notRequired:!1},{questionGreen:"Customer didn't allow persons access to the device that houses the Digital Wallet and suspects they conducted the transaction",questionRed:"Customer allowed persons access to the device that houses the Digital Wallet",notRequired:!1},{questionGreen:"No login to chase.com from a lost/stolen device with biometric login credentials after the device was lost/stolen",questionRed:"Successful login to chase.com from a lost/stolen device with biometric login credentials after the device was lost/stolen",notRequired:!1},{questionGreen:"Customer didn't share sign-on passwords/PINs required to make purchases or conduct activity",questionRed:"Customer shared sign-on, passwords/PINs required to make purchases or conduct activity",notRequired:!1},{questionGreen:"Customer disputing all transactions done with the token ID after the first fraudulent transaction",questionRed:"Customer not disputing all non-recurring transactions done with the token ID after the first fraudulent transaction",notRequired:!1},{questionGreen:"Invalid ZIP Code attempts \nInvalid PIN attempts found",questionRed:null,notRequired:!1},{questionGreen:"Third-party fraud indicators present",questionRed:null,notRequired:!1},{questionGreen:null,questionRed:"FPF indicators present",notRequired:!1}],"Non Receipt":[{questionGreen:"Card not activated at a terminal previously used by the customer within the last six months",questionRed:null,notRequired:!1},{questionGreen:null,questionRed:"Card sent to the mailing address on file with no PIN mailer and card activated at a terminal used by the customer within the last six months",notRequired:!1},{questionGreen:"Customer disputing all transactions performed on a card not received (Excludes 522 or MOTO 2 transactions)",questionRed:"Customer not disputing all transactions performed on a card not received (i.e., can't be code 522 or MOTO 2)",notRequired:!1},{questionGreen:"Invalid PIN attempts (i.e., N/A if the PIN was carried with the card)",questionRed:"No invalid PIN attempts (i.e., N/A if the PIN was carried with the card)",notRequired:!1},{questionGreen:"Out of pattern transactions: No history of valid transactions at the same merchant location / terminal of disputed transactions OR disputed transactions not similar in frequency and dollar amounts of customers' previous valid transactions at the same merchant location / terminal",questionRed:"Two or more undisputed transactions at the same merchant location / terminal as disputed transactions for similar frequencies and dollar amounts",notRequired:!1},{questionGreen:"Disputed transaction recurring (i.e., code 522 or MOTO 2) and related previous transactions also disputed",questionRed:"Disputed transaction recurring (i.e., code 522 or MOTO 2) and related previous transactions not disputed",notRequired:!1},{questionGreen:"Transactions attempted after card closure",questionRed:null,notRequired:!1},{questionGreen:"Third-party fraud indicators present",questionRed:null,notRequired:!1},{questionGreen:null,questionRed:"FPF indicators present",notRequired:!1}],"Unauth MOTO":[{questionGreen:"Out of pattern transactions: No history of valid transactions at the same merchant location / terminal of disputed transactions OR disputed transactions not similar in frequency and dollar amounts of customers' previous valid transactions at the same merchant location / terminal",questionRed:"Two or more undisputed transactions at the same merchant location / terminal as disputed transactions for similar frequencies and dollar amounts",notRequired:!1},{questionGreen:"Disputed transaction recurring (i.e., code 522 or MOTO 2) and related previous transactions also disputed",questionRed:"Disputed transaction recurring (i.e., code 522 or MOTO 2) and related previous transactions not disputed",notRequired:!1},{questionGreen:"Subscription merchants: Initial sign-up transaction also disputed (customer didn't authorize subscription)",questionRed:"Subscription merchants: Initial sign-up transaction valid but following charges reported as fraud (i.e., shows claim Non Fraud)",notRequired:!1},{questionGreen:"Third-party fraud indicators present",questionRed:null,notRequired:!1},{questionGreen:null,questionRed:"FPF indicators present",notRequired:!1}]}},(t=[{key:"analyze",value:function(e){var t=e.scenario;return this.isFraudScenario(t),"Scenario: ".concat(t,"\n\n"),this.getQuestionsForScenario(t)}},{key:"isFraudScenario",value:function(e){return["ATO","TPI","Counterfeit","Cnft Digital","Lost card","Stolen card","Lst/Stl Dgtl","Non Receipt","Unauth MOTO"].includes(e)}},{key:"getQuestionsForScenario",value:function(e){return this.isFraudScenario(e)?this.analysisQuestions[e].map((function(e,t){return{green:e.questionGreen,red:e.questionRed,notRequired:!1}})):this.analysisQuestions[e]||[]}},{key:"validateAnalysisAnswers",value:function(e,t){var n=this.getQuestionsForScenario(e),i=!0,a=[];return n.forEach((function(e,n){t[n]||e.notRequired||(i=!1,a.push(e.question))})),{isValid:i,unansweredQuestions:a}}}])&&function(e,t){for(var n=0;n<t.length;n++){var i=t[n];i.enumerable=i.enumerable||!1,i.configurable=!0,"value"in i&&(i.writable=!0),Object.defineProperty(e,s(i.key),i)}}(e.prototype,t),Object.defineProperty(e,"prototype",{writable:!1}),e;var e,t}()},967:function(t,n,i){var a=i(21),s=i(296);function r(t){return r="function"==typeof Symbol&&"symbol"==e(Symbol.iterator)?function(t){return e(t)}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":e(t)},r(t)}function o(e,t){var n=Object.keys(e);if(Object.getOwnPropertySymbols){var i=Object.getOwnPropertySymbols(e);t&&(i=i.filter((function(t){return Object.getOwnPropertyDescriptor(e,t).enumerable}))),n.push.apply(n,i)}return n}function l(e){for(var t=1;t<arguments.length;t++){var n=null!=arguments[t]?arguments[t]:{};t%2?o(Object(n),!0).forEach((function(t){u(e,t,n[t])})):Object.getOwnPropertyDescriptors?Object.defineProperties(e,Object.getOwnPropertyDescriptors(n)):o(Object(n)).forEach((function(t){Object.defineProperty(e,t,Object.getOwnPropertyDescriptor(n,t))}))}return e}function u(e,t,n){return(t=v(t))in e?Object.defineProperty(e,t,{value:n,enumerable:!0,configurable:!0,writable:!0}):e[t]=n,e}function c(e,t){return function(e){if(Array.isArray(e))return e}(e)||function(e,t){var n=null==e?null:"undefined"!=typeof Symbol&&e[Symbol.iterator]||e["@@iterator"];if(null!=n){var i,a,s,r,o=[],l=!0,u=!1;try{if(s=(n=n.call(e)).next,0===t){if(Object(n)!==n)return;l=!1}else for(;!(l=(i=s.call(n)).done)&&(o.push(i.value),o.length!==t);l=!0);}catch(e){u=!0,a=e}finally{try{if(!l&&null!=n.return&&(r=n.return(),Object(r)!==r))return}finally{if(u)throw a}}return o}}(e,t)||function(e,t){if(e){if("string"==typeof e)return d(e,t);var n={}.toString.call(e).slice(8,-1);return"Object"===n&&e.constructor&&(n=e.constructor.name),"Map"===n||"Set"===n?Array.from(e):"Arguments"===n||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)?d(e,t):void 0}}(e,t)||function(){throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}()}function d(e,t){(null==t||t>e.length)&&(t=e.length);for(var n=0,i=Array(t);n<t;n++)i[n]=e[n];return i}function p(){p=function(){return t};var e,t={},n=Object.prototype,i=n.hasOwnProperty,a=Object.defineProperty||function(e,t,n){e[t]=n.value},s="function"==typeof Symbol?Symbol:{},o=s.iterator||"@@iterator",l=s.asyncIterator||"@@asyncIterator",u=s.toStringTag||"@@toStringTag";function c(e,t,n){return Object.defineProperty(e,t,{value:n,enumerable:!0,configurable:!0,writable:!0}),e[t]}try{c({},"")}catch(e){c=function(e,t,n){return e[t]=n}}function d(e,t,n,i){var s=t&&t.prototype instanceof q?t:q,r=Object.create(s.prototype),o=new N(i||[]);return a(r,"_invoke",{value:O(e,n,o)}),r}function h(e,t,n){try{return{type:"normal",arg:e.call(t,n)}}catch(e){return{type:"throw",arg:e}}}t.wrap=d;var m="suspendedStart",f="suspendedYield",y="executing",v="completed",g={};function q(){}function b(){}function C(){}var S={};c(S,o,(function(){return this}));var w=Object.getPrototypeOf,R=w&&w(w(T([])));R&&R!==n&&i.call(R,o)&&(S=R);var A=C.prototype=q.prototype=Object.create(S);function L(e){["next","throw","return"].forEach((function(t){c(e,t,(function(e){return this._invoke(t,e)}))}))}function k(e,t){function n(a,s,o,l){var u=h(e[a],e,s);if("throw"!==u.type){var c=u.arg,d=c.value;return d&&"object"==r(d)&&i.call(d,"__await")?t.resolve(d.__await).then((function(e){n("next",e,o,l)}),(function(e){n("throw",e,o,l)})):t.resolve(d).then((function(e){c.value=e,o(c)}),(function(e){return n("throw",e,o,l)}))}l(u.arg)}var s;a(this,"_invoke",{value:function(e,i){function a(){return new t((function(t,a){n(e,i,t,a)}))}return s=s?s.then(a,a):a()}})}function O(t,n,i){var a=m;return function(s,r){if(a===y)throw Error("Generator is already running");if(a===v){if("throw"===s)throw r;return{value:e,done:!0}}for(i.method=s,i.arg=r;;){var o=i.delegate;if(o){var l=E(o,i);if(l){if(l===g)continue;return l}}if("next"===i.method)i.sent=i._sent=i.arg;else if("throw"===i.method){if(a===m)throw a=v,i.arg;i.dispatchException(i.arg)}else"return"===i.method&&i.abrupt("return",i.arg);a=y;var u=h(t,n,i);if("normal"===u.type){if(a=i.done?v:f,u.arg===g)continue;return{value:u.arg,done:i.done}}"throw"===u.type&&(a=v,i.method="throw",i.arg=u.arg)}}}function E(t,n){var i=n.method,a=t.iterator[i];if(a===e)return n.delegate=null,"throw"===i&&t.iterator.return&&(n.method="return",n.arg=e,E(t,n),"throw"===n.method)||"return"!==i&&(n.method="throw",n.arg=new TypeError("The iterator does not provide a '"+i+"' method")),g;var s=h(a,t.iterator,n.arg);if("throw"===s.type)return n.method="throw",n.arg=s.arg,n.delegate=null,g;var r=s.arg;return r?r.done?(n[t.resultName]=r.value,n.next=t.nextLoc,"return"!==n.method&&(n.method="next",n.arg=e),n.delegate=null,g):r:(n.method="throw",n.arg=new TypeError("iterator result is not an object"),n.delegate=null,g)}function F(e){var t={tryLoc:e[0]};1 in e&&(t.catchLoc=e[1]),2 in e&&(t.finallyLoc=e[2],t.afterLoc=e[3]),this.tryEntries.push(t)}function I(e){var t=e.completion||{};t.type="normal",delete t.arg,e.completion=t}function N(e){this.tryEntries=[{tryLoc:"root"}],e.forEach(F,this),this.reset(!0)}function T(t){if(t||""===t){var n=t[o];if(n)return n.call(t);if("function"==typeof t.next)return t;if(!isNaN(t.length)){var a=-1,s=function n(){for(;++a<t.length;)if(i.call(t,a))return n.value=t[a],n.done=!1,n;return n.value=e,n.done=!0,n};return s.next=s}}throw new TypeError(r(t)+" is not iterable")}return b.prototype=C,a(A,"constructor",{value:C,configurable:!0}),a(C,"constructor",{value:b,configurable:!0}),b.displayName=c(C,u,"GeneratorFunction"),t.isGeneratorFunction=function(e){var t="function"==typeof e&&e.constructor;return!!t&&(t===b||"GeneratorFunction"===(t.displayName||t.name))},t.mark=function(e){return Object.setPrototypeOf?Object.setPrototypeOf(e,C):(e.__proto__=C,c(e,u,"GeneratorFunction")),e.prototype=Object.create(A),e},t.awrap=function(e){return{__await:e}},L(k.prototype),c(k.prototype,l,(function(){return this})),t.AsyncIterator=k,t.async=function(e,n,i,a,s){void 0===s&&(s=Promise);var r=new k(d(e,n,i,a),s);return t.isGeneratorFunction(n)?r:r.next().then((function(e){return e.done?e.value:r.next()}))},L(A),c(A,u,"Generator"),c(A,o,(function(){return this})),c(A,"toString",(function(){return"[object Generator]"})),t.keys=function(e){var t=Object(e),n=[];for(var i in t)n.push(i);return n.reverse(),function e(){for(;n.length;){var i=n.pop();if(i in t)return e.value=i,e.done=!1,e}return e.done=!0,e}},t.values=T,N.prototype={constructor:N,reset:function(t){if(this.prev=0,this.next=0,this.sent=this._sent=e,this.done=!1,this.delegate=null,this.method="next",this.arg=e,this.tryEntries.forEach(I),!t)for(var n in this)"t"===n.charAt(0)&&i.call(this,n)&&!isNaN(+n.slice(1))&&(this[n]=e)},stop:function(){this.done=!0;var e=this.tryEntries[0].completion;if("throw"===e.type)throw e.arg;return this.rval},dispatchException:function(t){if(this.done)throw t;var n=this;function a(i,a){return o.type="throw",o.arg=t,n.next=i,a&&(n.method="next",n.arg=e),!!a}for(var s=this.tryEntries.length-1;s>=0;--s){var r=this.tryEntries[s],o=r.completion;if("root"===r.tryLoc)return a("end");if(r.tryLoc<=this.prev){var l=i.call(r,"catchLoc"),u=i.call(r,"finallyLoc");if(l&&u){if(this.prev<r.catchLoc)return a(r.catchLoc,!0);if(this.prev<r.finallyLoc)return a(r.finallyLoc)}else if(l){if(this.prev<r.catchLoc)return a(r.catchLoc,!0)}else{if(!u)throw Error("try statement without catch or finally");if(this.prev<r.finallyLoc)return a(r.finallyLoc)}}}},abrupt:function(e,t){for(var n=this.tryEntries.length-1;n>=0;--n){var a=this.tryEntries[n];if(a.tryLoc<=this.prev&&i.call(a,"finallyLoc")&&this.prev<a.finallyLoc){var s=a;break}}s&&("break"===e||"continue"===e)&&s.tryLoc<=t&&t<=s.finallyLoc&&(s=null);var r=s?s.completion:{};return r.type=e,r.arg=t,s?(this.method="next",this.next=s.finallyLoc,g):this.complete(r)},complete:function(e,t){if("throw"===e.type)throw e.arg;return"break"===e.type||"continue"===e.type?this.next=e.arg:"return"===e.type?(this.rval=this.arg=e.arg,this.method="return",this.next="end"):"normal"===e.type&&t&&(this.next=t),g},finish:function(e){for(var t=this.tryEntries.length-1;t>=0;--t){var n=this.tryEntries[t];if(n.finallyLoc===e)return this.complete(n.completion,n.afterLoc),I(n),g}},catch:function(e){for(var t=this.tryEntries.length-1;t>=0;--t){var n=this.tryEntries[t];if(n.tryLoc===e){var i=n.completion;if("throw"===i.type){var a=i.arg;I(n)}return a}}throw Error("illegal catch attempt")},delegateYield:function(t,n,i){return this.delegate={iterator:T(t),resultName:n,nextLoc:i},"next"===this.method&&(this.arg=e),g}},t}function h(e,t,n,i,a,s,r){try{var o=e[s](r),l=o.value}catch(e){return void n(e)}o.done?t(l):Promise.resolve(l).then(i,a)}function m(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}function f(e,t){for(var n=0;n<t.length;n++){var i=t[n];i.enumerable=i.enumerable||!1,i.configurable=!0,"value"in i&&(i.writable=!0),Object.defineProperty(e,v(i.key),i)}}function y(e,t,n){return t&&f(e.prototype,t),n&&f(e,n),Object.defineProperty(e,"prototype",{writable:!1}),e}function v(e){var t=function(e){if("object"!=r(e)||!e)return e;var t=e[Symbol.toPrimitive];if(void 0!==t){var n=t.call(e,"string");if("object"!=r(n))return n;throw new TypeError("@@toPrimitive must return a primitive value.")}return String(e)}(e);return"symbol"==r(t)?t:t+""}var g=y((function e(){var t=this;m(this,e),this.elements={xInput:document.getElementById("xInput"),xResult:document.getElementById("xResult"),overlay:document.getElementById("clickToPasteOverlay"),xAnalysis:document.getElementById("xAnalysis"),xInsight:document.getElementById("xInsight"),xD:document.getElementById("xD"),xOutput:document.getElementById("xOutput"),clearBtns:document.querySelectorAll(".clear-btn"),logClaimBtn:document.getElementById("log-claim-btn"),allLogsBtn:document.getElementById("all-logs-btn"),logsPopup:document.getElementById("logs-popup"),closePopupBtn:document.querySelector(".close-popup"),pasteButton:document.getElementById("pasteButton"),fillButton:document.getElementById("fillButton"),fill2Button:document.getElementById("fill2Button"),inputTitle:document.querySelector(".box .title-bar .title"),step1Content:document.getElementById("step1Content"),step2Content:document.getElementById("step2Content"),step3Content:document.getElementById("step3Content"),step4Content:document.getElementById("step4Content"),step5Content:document.getElementById("step5Content"),analysisContainer:document.querySelector(".analysis-container"),copyButton:document.getElementById("copyButton"),timerrs:document.getElementById("timerrs")},this.state={fields:{},hasCCS:!1,hasCA:!1,isRawInputVisible:!1},this.setupShortcuts(),this.updateRecentClaims(),this.renderResultBox(),this.analyzer=new s.h,this.setupEventListeners(),this.setupClickToPaste(),this.elements.copyButton=document.getElementById("copyButton"),this.elements.logClaimButton=document.getElementById("logClaimButton"),this.elements.copyButton.addEventListener("click",(function(){return t.handleCopy()})),this.elements.logClaimButton.addEventListener("click",(function(){return t.handleLogClaim()})),this.analysisAnswers={},this.currentScenario=null,this.setupRealTimeUpdates(),this.elements.analysisContainer=document.createElement("div"),this.elements.analysisContainer.className="analysis-container",this.elements.xAnalysis.parentNode.insertBefore(this.elements.analysisContainer,this.elements.xAnalysis),this.elements.selectAllContainer=document.getElementById("selectAllContainer"),this.elements.selectAll=document.getElementById("selectAll"),this.elements.selectAllActions=document.getElementById("selectAllActions"),this.elements.selectNotNeeded=document.getElementById("selectNotNeeded"),this.elements.selectMoreInfo=document.getElementById("selectMoreInfo"),this.elements.selectBack=document.getElementById("selectBack"),this.elements.selectAll.addEventListener("click",(function(){return t.showSelectAllOptions()})),this.elements.selectNotNeeded.addEventListener("click",(function(){return t.selectAllAction("notNeeded")})),this.elements.selectMoreInfo.addEventListener("click",(function(){return t.selectAllAction("moreInfo")})),this.elements.selectBack.addEventListener("click",(function(){return t.hideSelectAllOptions()})),this.elements.xResult.addEventListener("input",this.updateOutput.bind(this)),this.elements.xAnalysis.addEventListener("input",this.updateOutput.bind(this)),this.elements.xD.addEventListener("input",this.updateOutput.bind(this)),this.elements.xResult.addEventListener("click",this.handleSpecialFieldClick.bind(this)),this.elements.analysisContainer.addEventListener("input",this.updateOutput.bind(this)),this.fieldsRequiringInteraction=["withdrew","merchantCredit","duplicateClaim","pcUsedToFundOtherClaims","unusualDepositPriorToReporting","matchingAdjustment","claimsFiledLess1yr","immediateUseOfFunds"],this.setupFieldInteractions(),this.setupButtonAnimations()}),[{key:"setupRealTimeUpdates",value:function(){var e=this;document.querySelectorAll("input, textarea, [contenteditable]").forEach((function(t){t.addEventListener("input",e.debounce(e.updateOutput.bind(e),300))})),this.elements.xResult&&this.elements.xResult.addEventListener("click",(function(t){e.handleResultClick(t),e.updateOutput()})),this.elements.analysisContainer&&this.elements.analysisContainer.addEventListener("input",this.debounce(this.updateOutput.bind(this),300)),this.elements.xD&&this.elements.xD.addEventListener("input",this.debounce(this.updateOutput.bind(this),300)),this.elements.xAnalysis&&this.elements.xAnalysis.addEventListener("input",this.debounce(this.updateOutput.bind(this),300))}},{key:"setupEventListeners",value:function(){var e=this;this.elements.xInput.addEventListener("input",this.debounce(this.handleInput.bind(this),300)),this.elements.xD.addEventListener("input",this.debounce(this.updateOutput.bind(this),300)),this.elements.clearBtns.forEach((function(t){return t.addEventListener("click",e.handleClear.bind(e))})),this.elements.fillButton.addEventListener("click",this.fill.bind(this)),this.elements.fill2Button.addEventListener("click",this.fill2.bind(this)),this.elements.xResult.addEventListener("click",this.handleResultClick.bind(this))}},{key:"setupClickToPaste",value:function(){var e=this;this.elements.overlay&&this.elements.overlay.addEventListener("click",function(e){return function(){var t=this,n=arguments;return new Promise((function(i,a){var s=e.apply(t,n);function r(e){h(s,i,a,r,o,"next",e)}function o(e){h(s,i,a,r,o,"throw",e)}r(void 0)}))}}(p().mark((function t(){var n;return p().wrap((function(t){for(;;)switch(t.prev=t.next){case 0:return t.prev=0,t.next=3,navigator.clipboard.readText();case 3:n=t.sent,e.elements.xInput&&(e.elements.xInput.value=n,e.handleInput({target:{value:n}})),t.next=10;break;case 7:t.prev=7,t.t0=t.catch(0),console.error("Failed to read clipboard contents: ",t.t0);case 10:case"end":return t.stop()}}),t,null,[[0,7]])}))))}},{key:"handleInput",value:function(e){var t=this,n=e.target.value,i=(0,a._)(n);this.updateResultBox(i),this.currentScenario=i.scenario,this.renderAnalysisFields(this.currentScenario),this.updateAnalysis(i),this.updateOverlayText(n),this.currentScenario?this.elements.selectAllContainer.style.display="block":this.elements.selectAllContainer.style.display="none",Object.entries(i).forEach((function(e){var n=c(e,2),i=n[0],a=n[1],s=t.state.fields[i];s&&s.container&&t.updateFieldStatus(s.container,i,a)}))}},{key:"updateOverlayText",value:function(e){this.state.hasCCS=e.includes("Claim Display"),this.state.hasCA=e.includes("Checking Account Summary"),this.elements.overlay&&(this.state.hasCCS&&this.state.hasCA?(this.elements.overlay.style.display="none",this.elements.xResult&&(this.elements.xResult.style.display="block")):(this.elements.overlay.style.display="flex",this.elements.xResult&&(this.elements.xResult.style.display="none"),this.elements.overlay.textContent=this.state.hasCCS?"CCS Data Detected - Click to Paste CA":this.state.hasCA?"CA Data Detected - Click to Paste CCS":"Click to Paste CCS and CA"))}},{key:"updateResultBox",value:function(e){var t=this;Object.entries(e).forEach((function(e){var n=c(e,2),i=n[0],a=n[1],s=t.state.fields[i];s&&(s.value?(s.value.value=a||"",t.updateFieldStatus(s.container,i,a)):s.details&&t.updateSpecialField(s,a))}))}},{key:"updateFieldStatus",value:function(e,t,n){if(e instanceof Element){e.classList.remove("green","red","warning","has-value","not-needed","more-info"),e.classList.add("field-container"),this.fieldsRequiringInteraction.includes(t)&&(e.classList.contains("interacted")&&n?(e.classList.add("green"),e.classList.remove("red")):(e.classList.add("red"),e.classList.remove("green"))),e.classList.contains("special-field")||e.classList.add("regular-field");var i=function(t){e.classList.add(t)},a=function(e){return!e||""===e.trim()};if(this.elements.xInput.value.length<50)i("red");else if(a(n)||e.classList.add("has-value"),e.classList.contains("special-field"))this.handleSpecialFieldStatus(e,t,n);else switch(t){case"openDate":if(a(n))i("red");else{var s=new Date;s.setFullYear(s.getFullYear()-1),i(new Date(n)>s?"warning":"green")}break;case"ytdAvgBal":if(a(n))i("red");else{var r=this.state.fields.claimAmount,o=r?parseFloat(r.value.value.replace(/[^0-9.-]+/g,"")):0;i(parseFloat(n.replace(/[^0-9.-]+/g,""))<o?"warning":"green")}break;case"disputeCategory":case"sixtyDayLiability":case"moreThanTwoYears":i(a(n)?"red":"Yes"===n?"warning":"green");break;case"nsf":a(n)?i("red"):i(parseInt(n,10)>9?"warning":"green");break;case"pcUsedToFundOtherClaims":case"unusualDepositPriorToReporting":case"matchingAdjustment":case"claimsFiledLess1yr":case"immediateUseOfFunds":i(a(n)?"red":"green");break;default:a(n)?i("red"):i(this.checkWarningCondition(t,n)?"warning":"green")}}}},{key:"handleSpecialFieldStatus",value:function(e,t,n){var i=e.querySelector(".details-input");"withdrew"===t||"merchantCredit"===t||"duplicateClaim"===t?"No"===n?(e.classList.add("green"),e.classList.remove("red")):"6Day"===n||"Immediate"===n||"PC Issued"===n||"No Action Yet"===n?(e.classList.add(""!==i.value.trim()?"green":"red"),e.classList.remove(""!==i.value.trim()?"red":"green")):(e.classList.add("red"),e.classList.remove("green")):"merchantCredit"===t&&e.classList.add("No"===n||("Partial"===n||"Full"===n)&&""!==i.value.trim()?"green":"red")}},{key:"handleSpecialFieldClick",value:function(e,t){var n=this.state.fields[e];if(n&&n.container){var i=n.container,a={buttonsContainer:i.querySelector(".buttons-container"),secondaryButtons:i.querySelector(".secondary-buttons"),detailsInput:i.querySelector(".details-input"),actionButton:i.querySelector(".".concat(t,"-btn"))};i.querySelectorAll("button").forEach((function(e){return e.classList.remove("selected")})),a.actionButton.classList.add("selected"),["withdrew","merchantCredit","duplicateClaim"].includes(e)?"yes"===t?(a.buttonsContainer.style.display="none",a.secondaryButtons.style.display="grid",i.classList.add("red"),i.classList.remove("green"),n.value="Yes"):"no"===t?(this.resetSpecialField(e),i.classList.add("green"),i.classList.remove("red"),n.value="No"):(a.detailsInput.style.display="grid",a.detailsInput.placeholder="duplicateClaim"===e?"Related Claim No":"Enter details...",n.value=a.actionButton.textContent):"yes"===t?(a.buttonsContainer.style.display="none",a.secondaryButtons.style.display="grid",n.value="Yes"):"no"===t?(this.resetSpecialField(e),i.classList.add("green"),n.value="No"):(a.detailsInput.style.display="grid",n.value=a.actionButton.textContent),this.updateSpecialFieldStatus(i,a.detailsInput),this.updateOutput()}}},{key:"updateSpecialFieldStatus",value:function(e,t){t&&"none"!==t.style.display&&(""===t.value.trim()?(e.classList.add("red"),e.classList.remove("green")):(e.classList.add("green"),e.classList.remove("red")))}},{key:"resetSpecialField",value:function(e){var t=this.state.fields[e];if(t&&t.container){var n=t.container,i=n.querySelector(".buttons-container"),a=n.querySelector(".secondary-buttons"),s=n.querySelector(".details-input");n.classList.remove("green","red"),i&&(i.style.display="grid"),a&&(a.style.display="none"),s&&(s.style.display="none",s.value=""),n.querySelectorAll("button").forEach((function(e){return e.classList.remove("selected")}))}}},{key:"handleResetSpecialField",value:function(e){this.resetSpecialField(e);var t=this.state.fields[e];t&&t.container&&t.container.classList.remove("green","red")}},{key:"checkWarningCondition",value:function(e,t){var n=new Date;switch(e){case"customerSince":return new Date(t)>new Date(n.setFullYear(n.getFullYear()-1));case"dateOfBirth":var i=this.calculateAge(t);return i>60||i>10&&i<18;default:return!1}}},{key:"calculateAge",value:function(e){if(!e)return 0;var t=new Date,n=new Date(e),i=t.getFullYear()-n.getFullYear(),a=t.getMonth()-n.getMonth();return(a<0||0===a&&t.getDate()<n.getDate())&&i--,i}},{key:"handleResultClick",value:function(e){var t=e.target.closest(".field-container");if(t){var n=t.dataset.field,i=e.target.classList.contains("yes-btn")?"yes":e.target.classList.contains("no-btn")?"no":e.target.classList.contains("option1-btn")?"option1":e.target.classList.contains("option2-btn")?"option2":null;i&&this.handleSpecialFieldClick(n,i)}}},{key:"updateTitle",value:function(e){this.elements.inputTitle&&(this.elements.inputTitle.textContent=e)}},{key:"renderResultBox",value:function(){var e=this;if(this.elements.xResult){this.elements.xResult.innerHTML="";var t=function(n,i){n.forEach((function(n){if(n.fields){var a=document.createElement("div");a.className=n.name,t(n.fields,a),i.appendChild(a)}else{var s=n.special?e.createSpecialFieldElement(n):e.createFieldElement(n);n.className&&s.classList.add(n.className),i.appendChild(s)}}))};[{name:"fields-container",fields:[{name:"accountNumber",label:"Account Number",className:"account-number-field"},{name:"regular-fields",fields:[{name:"scenario",label:"Scenario"},{name:"status",label:"Claim Status"},{name:"claimAmount",label:"Claim Amount"},{name:"disputeCategory",label:"Dispute Ctgry"},{name:"sixtyDayLiability",label:"60 D Liability"},{name:"moreThanTwoYears",label:"Tx > 2 Years"},{name:"customerSince",label:"Cx Since"},{name:"dateOfBirth",label:"Date of Birth"},{name:"openDate",label:"Open Date"},{name:"ytdAvgBal",label:"YTD Avg Bal"},{name:"nsf",label:"NSF"}]},{name:"claimsFiledLess1yr",label:"Claims filed less than 1yr",className:"account-number-field"},{name:"immediateUseOfFunds",label:"Funds Used Immediately",className:"account-number-field"}]},{name:"special-fields",fields:[{name:"withdrew",label:"Withdrew",special:!0},{name:"merchantCredit",label:"Mrct Credit",special:!0},{name:"duplicateClaim",label:"Duplicate Claim",special:!0},{name:"pcUsedToFundOtherClaims",label:"PC Used for Other Claims"},{name:"unusualDepositPriorToReporting",label:"Unusual deposit"},{name:"matchingAdjustment",label:"Matching Adjustment"}]}].forEach((function(n){var i=document.createElement("div");i.className=n.name,t(n.fields,i),e.elements.xResult.appendChild(i)}))}}},{key:"createFieldElement",value:function(e){var t=this,n=document.createElement("div");n.className="field-container regular-field",n.dataset.field=e.name;var i=document.createElement("span");i.className="field-label",i.textContent="".concat(e.label,":");var a,s=document.createElement("input");return s.type="checkbox",s.className="field-focus-control",["pcUsedToFundOtherClaims","unusualDepositPriorToReporting","matchingAdjustment","claimsFiledLess1yr","immediateUseOfFunds"].includes(e.name)?(a=document.createElement("textarea")).rows=3:((a=document.createElement("input")).type="text",a.maxLength=12),a.className="field-value",a.id="field-".concat(e.name),"INPUT"===a.tagName&&a.addEventListener("keydown",(function(e){"Enter"===e.key&&(e.preventDefault(),a.blur())})),a.addEventListener("input",(function(){t.updateFieldStatus(n,e.name,a.value)})),a.addEventListener("blur",(function(){s.checked=!1})),n.appendChild(i),n.appendChild(s),n.appendChild(a),n.addEventListener("click",(function(e){e.target!==a&&(s.checked=!0,a.focus())})),this.state.fields[e.name]={container:n,value:a},n}},{key:"createSpecialFieldElement",value:function(e){var t=this,n=function(e,t){var n=arguments.length>2&&void 0!==arguments[2]?arguments[2]:"",i=arguments.length>3&&void 0!==arguments[3]?arguments[3]:null,a=document.createElement(e);return a.className=t,n&&(a.textContent=n),i&&i.appendChild(a),a},i=n("div","field-container special-field");i.dataset.field=e.name;var a=n("div","label-container","",i);n("span","field-label","".concat(e.label,":"),a);var s=n("button","reset-btn","Reset",a);s.style.display="none";var r=n("div","buttons-container","",i),o=n("div","secondary-buttons","",i),l=function(){s.style.display="inline-block"};["Yes","No"].forEach((function(e){n("button","".concat(e.toLowerCase(),"-btn"),e,r).addEventListener("click",l)}));var u=[];["withdrew","merchantCredit","duplicateClaim"].includes(e.name)&&(u={withdrew:["6Day","Immediate"],merchantCredit:["Partial","Full"],duplicateClaim:["PC Issued","No Action Yet"]}[e.name].map((function(e,t){var i=n("button","option".concat(t+1,"-btn"),e,o);return i.addEventListener("click",(function(e){u.forEach((function(t){return t.style.display=t===e.target?"inline-block":"none"}))})),i})));var c=n("textarea","details-input","",i);return c.placeholder="Enter details...",c.style.height="2em",c.style.resize="none",c.style.overflow="auto",c.addEventListener("input",(function(){return t.handleSpecialFieldInput(e.name)})),s.addEventListener("click",(function(){t.handleResetSpecialField(e.name),u.forEach((function(e){return e.style.display="inline-block"})),c.value="",s.style.display="none"})),this.state.fields[e.name]={container:i,detailsInput:c},i}},{key:"handleSpecialFieldInput",value:function(e){var t=this.state.fields[e];if(t&&t.container){var n=t.container,i=n.querySelector(".details-input");this.updateSpecialFieldStatus(n,i)}}},{key:"fill",value:function(){this.appendToInput("\t Queues \t Claim \t Financials \t Approvals \t Reconstruction \t Enhanced Claim Search \t Retail Digital Intake \n\tClaim Search\tClick to Minimize\t\n\nClaim Number\n123456789123456\nSearch Results, Total Claims Found: 1\n123456789123456\nD\n09/09/2024 11:03 AM\nClosed\n$119.95\n\nBirth Date:\t02/16/2005 \tSegment:\t \nSSN/TIN:\tXX  Copy \tCustomer Since:\t06/11/2024 \n \t \tStatus:\t03 \n\tClaim Display  Segment: No Special Segment, LOB Tier1: National Ret\nReference Number: 123456789123456\t\nRefresh\tShow Available Actions\tEdit\nCustomer Name:\tD\tClaim Amount:\t$119.95\nSSN:\tXX  Copy\tStatus Code:\tClosed (08)\nTransactions:\nDate\tCode\tScenario\tDescription\tAmount\tAccount\n07/09/2024\t0543 Show Additional Information\tMerchandise not received\tE 7 07/09\t$119.95\tXXXXX2581  Copy Total Checking\nXXXXXXXXXXXX3302  Copy ATM/Debit Card")}},{key:"fill2",value:function(){this.appendToInput("\n\nChecking Account Summary\n\n$0.00\nAverage Balance YTD\n\n$1,188.00\t\nAccrued \n\nNo Assigned Overdraft Officer\nTotal # Occurrences MTD\n\n1\t\nTotal # OD/NSF Occurrences Past 12 Months\n\n61 (days debits presented against NSF funds)\n\nAccount\n\nMiscellaneous\n\nOpen Date\n\n04/10/2023\t\nClose Date\n\n\nNo\nHelpLE")}},{key:"renderAnalysisFields",value:function(e){var t=this;this.elements.analysisContainer.innerHTML="";var n=this.analyzer.getQuestionsForScenario(e),i=this.analyzer.isFraudScenario(e);this.elements.analysisContainer.style.gridTemplateColumns=i?"1fr":"1fr 1fr",n.forEach((function(e,n){var a=t.createFieldContainer(e,n,i);t.elements.analysisContainer.appendChild(a)})),this.updateAnalysisOutput(),this.updateOutput()}},{key:"createFieldContainer",value:function(e,t,n){var i=this,a=document.createElement("div");a.className="analysis-field-container",a.dataset.questionIndex=t;var s=document.createElement("span");if(s.className="question-text",s.textContent=e.question,n){var r=this.createFraudFlagContainer("green",e.green),o=this.createFraudFlagContainer("red",e.red),l=document.createElement("input");l.type="text",l.className="fraud-input",l.style.display="none",l.addEventListener("input",(function(){return i.updateAnalysisOutput()})),a.appendChild(s),a.appendChild(r),a.appendChild(o),a.appendChild(l),a.classList.add("f","placeholder"),r.style.display="grid",o.style.display="none",a.addEventListener("click",(function(e){e.target!==l&&i.handleFraudFieldClick(e,t)})),a.addEventListener("contextmenu",(function(e){e.target!==l&&(i.handleFraudFieldRightClick(e,t),e.preventDefault())}))}else{var u,c=document.createElement("input");c.type="text",c.className="answer-input",c.value=(null===(u=this.analysisAnswers[t])||void 0===u?void 0:u.answer)||"",c.addEventListener("input",(function(e){return i.handleAnswerInput(e,t)})),a.appendChild(s),a.appendChild(c),a.addEventListener("click",(function(e){return i.handleNonFraudFieldClick(e,t)})),a.addEventListener("contextmenu",(function(e){return i.handleNonFraudFieldRightClick(e,t)}))}return a.addEventListener("dblclick",(function(e){return i.handleFieldDoubleClick(e,t)})),a}},{key:"createFraudFlagContainer",value:function(e,t){var n=document.createElement("div");n.className="fraud-flag-container f ".concat(e),n.style.display="none";var i=document.createElement("span");return i.textContent=t,n.appendChild(i),n}},{key:"handleNonFraudFieldClick",value:function(e,t){e.preventDefault();var n=e.currentTarget;n.classList.contains("more-info")&&this.resetMoreInfoState(n,t)}},{key:"handleNonFraudFieldRightClick",value:function(e,t){e.preventDefault();var n=e.currentTarget;n.classList.contains("more-info")?this.resetMoreInfoState(n,t):(n.classList.add("more-info"),n.querySelector(".answer-input").style.display="none",this.analysisAnswers[t]={answer:"",state:"moreInfo"},this.updateAnalysisFieldStatus(n,t),this.updateAnalysisOutput(),this.updateOutput())}},{key:"resetMoreInfoState",value:function(e,t){e.classList.remove("more-info");var n=e.querySelector(".answer-input");n.style.display="block",n.value="",this.analysisAnswers[t]={answer:"",state:"unanswered"},this.updateAnalysisFieldStatus(e,t),this.updateAnalysisOutput(),this.updateOutput()}},{key:"createFraudFieldContainer",value:function(e,t){var n=document.createElement("div");n.className="fraud-field-container f ".concat(e),n.style.display="none";var i=document.createElement("span");i.textContent=t;var a=document.createElement("input");return a.type="text",a.className="fraud-input",n.appendChild(i),n.appendChild(a),n}},{key:"handleFraudFieldClick",value:function(e,t){e.preventDefault();var n=e.currentTarget;if(!n.classList.contains("not-needed")){var i=n.querySelector(".f.green"),a=n.querySelector(".f.red"),s=n.querySelector(".fraud-input");n.classList.remove("placeholder","f","red"),n.classList.add("f","green"),i.style.display="grid",a.style.display="none",s.style.display="grid",this.analysisAnswers[t]={answer:"GREEN",state:"answered"},this.updateAnalysisFieldStatus(n,t),this.updateAnalysisOutput(),this.updateOutput()}}},{key:"handleFraudFieldRightClick",value:function(e,t){e.preventDefault();var n=e.currentTarget;if(!n.classList.contains("not-needed")){var i=n.querySelector(".f.green"),a=n.querySelector(".f.red"),s=n.querySelector(".fraud-input");n.classList.remove("placeholder","f","green"),n.classList.add("f","red"),i.style.display="none",a.style.display="block",s.style.display="block",this.analysisAnswers[t]={answer:"RED",state:"answered"},this.updateAnalysisFieldStatus(n,t),this.updateAnalysisOutput(),this.updateOutput()}}},{key:"handleAnswerInput",value:function(e,t){var n=e.target.value;this.analysisAnswers[t]=l(l({},this.analysisAnswers[t]),{},{answer:n,state:n?"answered":"unanswered"}),this.updateAnalysisFieldStatus(e.target.closest(".analysis-field-container"),t),this.updateAnalysisOutput(),this.updateOutput()}},{key:"handleFieldClick",value:function(e,t){var n=e.currentTarget,i=n.querySelector(".answer-input");n.classList.contains("not-needed")||n.classList.contains("more-info")||i.focus()}},{key:"updateAnalysisFieldStatus",value:function(e,t){if(e){e.classList.remove("has-value","not-needed","f","red","green","placeholder","more-info");var n=this.analysisAnswers[t];n&&(this.analyzer.isFraudScenario(this.currentScenario)?"answered"===n.state?e.classList.add("f",n.answer.toLowerCase()):"unanswered"===n.state&&e.classList.add("f","placeholder"):"answered"===n.state?e.classList.add("has-value"):"notNeeded"===n.state?e.classList.add("not-needed"):"moreInfo"===n.state&&e.classList.add("more-info"))}}},{key:"handleFieldDoubleClick",value:function(e,t){e.preventDefault();var n=e.currentTarget;this.analyzer.isFraudScenario(this.currentScenario)?n.classList.contains("placeholder")?(n.classList.remove("f","placeholder","green","red"),n.querySelector(".f.green").style.display="none",n.querySelector(".f.red").style.display="none",n.querySelector(".fraud-input").style.display="none",this.analysisAnswers[t]={answer:"NOT_REQUIRED",state:"inactive"}):(n.classList.add("f","placeholder"),n.classList.remove("green","red"),n.querySelector(".f.green").style.display="grid",n.querySelector(".f.red").style.display="none",n.querySelector(".fraud-input").style.display="none",this.analysisAnswers[t]={answer:"",state:"unanswered"}):n.classList.contains("not-needed")?(n.classList.remove("not-needed"),n.querySelector(".answer-input").style.display="grid",this.analysisAnswers[t]={answer:"",state:"unanswered"}):(n.classList.add("not-needed"),n.querySelector(".answer-input").style.display="none",this.analysisAnswers[t]={answer:"NOT_REQUIRED",state:"notNeeded"}),this.updateAnalysisFieldStatus(n,t),this.updateAnalysisOutput(),this.updateOutput()}},{key:"handleFieldRightClick",value:function(e,t){e.preventDefault(),this.toggleMoreInfo(t)}},{key:"toggleNeeded",value:function(e){var t=this.getFieldContainer(e);if(t){var n=t.querySelector(".answer-input"),i=t.classList.toggle("not-needed");t.classList.remove("more-info","has-value"),i?(n&&(n.style.display="none",n.value=""),this.analysisAnswers[e]=l(l({},this.analysisAnswers[e]),{},{state:"notNeeded",answer:"",moreInfo:!1})):(n&&(n.style.display="inline-block"),this.analysisAnswers[e]=l(l({},this.analysisAnswers[e]),{},{state:"unanswered",moreInfo:!1})),this.updateAnalysisOutput(),this.updateOutput()}}},{key:"toggleMoreInfo",value:function(e){var t=this.getFieldContainer(e);if(t){var n=t.querySelector(".answer-input"),i=t.querySelector(".toggle-button"),a=t.classList.toggle("more-info");t.classList.remove("not-needed"),i&&(i.textContent="Not Needed"),a?(n&&(n.style.display="none"),this.analysisAnswers[e]=l(l({},this.analysisAnswers[e]),{},{state:"moreInfo",moreInfo:!0})):(n&&(n.style.display="inline-block"),this.analysisAnswers[e]=l(l({},this.analysisAnswers[e]),{},{state:"answered",moreInfo:!1})),this.updateAnalysisOutput(),this.updateOutput()}}},{key:"createOptionButton",value:function(e,t){var n=document.createElement("button");return n.textContent=e,n.addEventListener("click",t),n}},{key:"setupShortcuts",value:function(){var e=this;document.addEventListener("keydown",(function(t){if(t.altKey)switch(t.key.toLowerCase()){case"c":t.preventDefault(),e.handleCopy(),e.animateButton(e.elements.copyButton);break;case"s":t.preventDefault(),e.handleLogClaim(),e.animateButton(e.elements.logClaimButton)}}))}},{key:"handleCopy",value:function(){var e=this.elements.xOutput.innerText;navigator.clipboard.writeText(e).then((function(){})).catch((function(e){console.error("Failed to copy: ",e)}))}},{key:"handleLogClaim",value:function(){this.showLogConfirmation()}},{key:"animateButton",value:function(e){e.classList.add("button-press-animation"),e.addEventListener("animationend",(function(){e.classList.remove("button-press-animation")}),{once:!0})}},{key:"showSelectAllOptions",value:function(){var e=this,t=this.analyzer.isFraudScenario(this.currentScenario);this.elements.selectAll.style.display="none",this.elements.selectAllActions.style.display="flex",this.elements.selectAllActions.style.flexDirection="column",t?(this.elements.selectNotNeeded.textContent="Not needed",this.elements.selectMoreInfo.textContent="Red",this.elements.selectGreenFlags||(this.elements.selectGreenFlags=document.createElement("button"),this.elements.selectGreenFlags.textContent="Green",this.elements.selectGreenFlags.addEventListener("click",(function(){return e.selectAllAction("greenFlags")})),this.elements.selectAllActions.appendChild(this.elements.selectGreenFlags)),this.elements.selectGreenFlags.style.display="block"):(this.elements.selectNotNeeded.textContent="Not Needed",this.elements.selectMoreInfo.textContent="More Info",this.elements.selectGreenFlags&&(this.elements.selectGreenFlags.style.display="none"))}},{key:"hideSelectAllOptions",value:function(){this.elements.selectAllActions.style.display="none",this.elements.selectAll.style.display="block"}},{key:"selectAllAction",value:function(e){var t=this,n=this.elements.analysisContainer.querySelectorAll(".analysis-field-container"),i=this.analyzer.isFraudScenario(this.currentScenario);n.forEach((function(n,a){i?"notNeeded"===e?t.toggleFraudFieldInactive(n,a):"moreInfo"===e?t.setFraudFieldRed(n,a):"greenFlags"===e&&t.setFraudFieldGreen(n,a):"notNeeded"===e?t.toggleNonFraudFieldNotNeeded(n,a):"moreInfo"===e&&t.setNonFraudFieldMoreInfo(n,a)})),this.hideSelectAllOptions(),this.updateAnalysisOutput(),this.updateOutput()}},{key:"setFraudFieldRed",value:function(e,t){var n=e.querySelector(".f.green"),i=e.querySelector(".f.red"),a=e.querySelector(".fraud-input");e.classList.remove("placeholder","f","green"),e.classList.add("f","red"),n.style.display="none",i.style.display="block",a.style.display="block",this.analysisAnswers[t]={answer:"RED",state:"answered"},this.updateAnalysisFieldStatus(e,t)}},{key:"setupButtonAnimations",value:function(){var e=this,t=function(e){e.classList.add("button-press-animation"),e.addEventListener("animationend",(function(){e.classList.remove("button-press-animation")}),{once:!0})};this.elements.copyButton.addEventListener("click",(function(){return t(e.elements.copyButton)})),this.elements.logClaimButton.addEventListener("click",(function(){return t(e.elements.logClaimButton)}))}},{key:"toggleNonFraudFieldNotNeeded",value:function(e,t){e.classList.contains("not-needed")?(e.classList.remove("not-needed"),e.querySelector(".answer-input").style.display="block",this.analysisAnswers[t]={answer:"",state:"unanswered"}):(e.classList.add("not-needed"),e.querySelector(".answer-input").style.display="none",this.analysisAnswers[t]={answer:"NOT_REQUIRED",state:"notNeeded"}),this.updateAnalysisFieldStatus(e,t)}},{key:"setNonFraudFieldMoreInfo",value:function(e,t){e.classList.add("more-info"),e.querySelector(".answer-input").style.display="none",this.analysisAnswers[t]={answer:"",state:"moreInfo"},this.updateAnalysisFieldStatus(e,t)}},{key:"setFraudFieldGreen",value:function(e,t){var n=e.querySelector(".f.green"),i=e.querySelector(".f.red"),a=e.querySelector(".fraud-input");e.classList.remove("placeholder","f","red"),e.classList.add("f","green"),n.style.display="block",i.style.display="none",a.style.display="block",this.analysisAnswers[t]={answer:"GREEN",state:"answered"},this.updateAnalysisFieldStatus(e,t)}},{key:"toggleFraudFieldInactive",value:function(e,t){e.classList.contains("placeholder")?(e.classList.remove("f","placeholder","green","red"),e.querySelector(".f.green").style.display="none",e.querySelector(".f.red").style.display="none",e.querySelector(".fraud-input").style.display="none",this.analysisAnswers[t]={answer:"NOT_REQUIRED",state:"inactive"}):(e.classList.add("f","placeholder"),e.classList.remove("green","red"),e.querySelector(".f.green").style.display="block",e.querySelector(".f.red").style.display="none",e.querySelector(".fraud-input").style.display="none",this.analysisAnswers[t]={answer:"",state:"unanswered"}),this.updateAnalysisFieldStatus(e,t)}},{key:"getFieldContainer",value:function(e){return this.elements.analysisContainer.querySelector('[data-question-index="'.concat(e,'"]'))}},{key:"updateAnalysisOutput",value:function(){var e=this,t="",n=[],i=[],a=[],s=this.analyzer.isFraudScenario(this.currentScenario),r=this.analyzer.getQuestionsForScenario(this.currentScenario);Object.entries(this.analysisAnswers).forEach((function(o){var l=c(o,2),u=l[0],d=l[1],p=r[u];if("notNeeded"!==d.state&&"inactive"!==d.state)if(s){if("answered"===d.state){var h=e.elements.analysisContainer.querySelector('[data-question-index="'.concat(u,'"]')).querySelector(".fraud-input"),m="GREEN"===d.answer?p.green:p.red,f=h.value?"\n".concat(h.value,"\n"):"\n";"GREEN"===d.answer?n.push(m+f):"RED"===d.answer&&i.push(m+f)}}else"answered"===d.state?t+="".concat(p.question,": ").concat(d.answer||"","\n"):"moreInfo"===d.state&&a.push(p.question)})),s&&(n.length>0&&(t+="Green Flags:\n",n.forEach((function(e){return t+="- ".concat(e)}))),i.length>0&&(t+="Red Flags:\n",i.forEach((function(e){return t+="- ".concat(e)})))),a.length>0&&(t+="\nMore info needed, please ask the customer the following questions to proceed with their claim:\n",a.forEach((function(e){return t+="- ".concat(e,"\n")}))),this.elements.xAnalysis?this.elements.xAnalysis.value=t:console.warn("xAnalysis element not found")}},{key:"updateAnalysis",value:function(e){if(this.analyzer){var t=this.analyzer.analyze(e);this.elements.xAnalysis&&(this.elements.xAnalysis.value=t)}}},{key:"updateStep1Content",value:function(){var e=this,t="";Object.entries({scenario:"Claim Scenario",status:"Pre Review Claim Status",duplicateClaim:"Duplicate",merchantCredit:"MC (Partial/Full)",withdrew:"Withdrew",matchingAdjustment:"Matching Adjustment"}).forEach((function(n){var i=c(n,2),a=i[0],s=i[1],r=e.state.fields[a],o=e.getFieldValue(r,a);if(t+="".concat(s,": ").concat(o,"<br>"),r&&r.detailsInput&&"none"!==r.detailsInput.style.display){var l=r.detailsInput.value;if(""!==l.trim()){var u=l.replace(/\n/g,"<br>");t+="".concat(u,"<br>")}}})),this.updateOutputSection("step1Content",t)}},{key:"updateStep2Content",value:function(){var e=this,t="";Object.entries({claimAmount:"Claim Amount",disputeCategory:"Dispute Category",sixtyDayLiability:"60 Day Liability",moreThanTwoYears:"Tran more than 2yrs"}).forEach((function(n){var i=c(n,2),a=i[0],s=i[1],r=e.state.fields[a],o=e.getFieldValue(r,a);t+="".concat(s,": ").concat(o,"<br>")}));var n=this.state.fields.dateOfBirth,i=this.getFieldValue(n,"dateOfBirth");if(this.calculateAge(i)>60){var a=this.state.fields.elderlyAbuse,s=this.getFieldValue(a,"elderlyAbuse");t+="Elderly Abuse: ".concat(s,"<br>")}t+="<br><h3>FPF Indicators:</h3>",Object.entries({customerSince:"Customer since",openDate:"Open date",ytdAvgBal:"YTD Avg Bal",nsf:"NSF",dateOfBirth:"DOB",claimsFiledLess1yr:"Claims filed less 1yr",immediateUseOfFunds:"Immediate use of funds",pcUsedToFundOtherClaims:"PC Used to fund other claims",unusualDepositPriorToReporting:"Unusual deposit prior to reporting"}).forEach((function(n){var i=c(n,2),a=i[0],s=i[1],r=e.state.fields[a],o=e.getFieldValue(r,a);t+="".concat(s,": ").concat(o,"<br>")})),t+="<br><h3>Insights/Findings:</h3>",this.elements.xAnalysis&&(t+=this.elements.xAnalysis.value.replace(/\n/g,"<br>")),this.updateOutputSection("step2Content",t)}},{key:"updateStep3Content",value:function(){if(this.elements.xD){var e=this.elements.xD.value.split(/Step \d+:/);if(e.length>1){var t=e[1].trim();t=(t=t.replace(/^Decision\s+/,"")).replace(/\n/g,"<br>"),this.updateOutputSection("step3Content",t)}}}},{key:"updateStep4Content",value:function(){if(this.elements.xD){var e=this.elements.xD.value.split(/Step \d+:/);if(e.length>2){var t=e[2].trim();t=(t=t.replace(/^Claim Resolution Action\s+/,"")).replace(/\n/g,"<br>"),this.updateOutputSection("step4Content",t)}}}},{key:"updateStep5Content",value:function(){if(this.elements.xD){var e=this.elements.xD.value.split(/Step \d+:/);if(e.length>3){var t=e[3].trim();t=(t=t.replace(/^Next steps \(If applicable\)\s+/,"")).replace(/\n/g,"<br>"),this.updateOutputSection("step5Content",t)}}}},{key:"setupFieldInteractions",value:function(){var e=this;this.fieldsRequiringInteraction.forEach((function(t){var n=e.state.fields[t];n&&n.container&&(n.value&&n.value.addEventListener("input",(function(){return e.handleFieldInteraction(t)})),"withdrew"!==t&&"merchantCredit"!==t&&"duplicateClaim"!==t||n.container.querySelectorAll("button").forEach((function(n){n.addEventListener("click",(function(){return e.handleFieldInteraction(t)}))})))}))}},{key:"handleFieldInteraction",value:function(e){var t=this.state.fields[e];t&&t.container&&(t.container.classList.add("interacted"),this.updateFieldStatus(t.container,e,this.getFieldValue(t,e)))}},{key:"getFieldValue",value:function(e,t){if(["withdrew","merchantCredit","duplicateClaim"].includes(t)){if(e.value)return e.value;var n=e.container.querySelector(".selected");return n?n.textContent:""}if(e&&e.value){if("string"==typeof e.value)return e.value;if(e.value.value)return e.value.value}return""}},{key:"updateOutputSection",value:function(e,t){var n=this.elements[e];n?n.innerHTML=t:console.warn("Element with id '".concat(e,"' not found."))}},{key:"refreshOutput",value:function(){this.updateOutput()}},{key:"updateOutput",value:function(){this.updateStep1Content(),this.updateStep2Content(),this.updateStep3Content(),this.updateStep4Content(),this.updateStep5Content()}},{key:"handleClear",value:function(e){var t=e.target.closest(".box"),n=t.querySelector("textarea"),i=t.querySelector("[contenteditable]");n&&(n.value=""),i&&(i.textContent=""),this.updateOutput(),this.resetLayout()}},{key:"showCopyFeedback",value:function(e){var t=document.createElement("div");t.textContent=e,t.style.position="fixed",t.style.bottom="20px",t.style.left="50%",t.style.transform="translateX(-50%)",t.style.padding="10px 20px",t.style.backgroundColor="rgba(0, 0, 0, 0.7)",t.style.color="white",t.style.borderRadius="5px",t.style.zIndex="1000",document.body.appendChild(t)}},{key:"formatTime",value:function(e){var t=Math.floor(e/3600),n=Math.floor(e%3600/60),i=e%60;return"".concat(this.pad(t),":").concat(this.pad(n),":").concat(this.pad(i))}},{key:"pad",value:function(e){return e.toString().padStart(2,"0")}},{key:"showLogConfirmation",value:function(){var e=this,t=document.createElement("div");t.className="log-confirmation-popup",t.innerHTML='\n            <div class="popup-content">\n                <h2>Confirm Log Claim</h2>\n                <p>Are you sure you want to log this claim?</p>\n                <button id="confirmLog">Confirm</button>\n                <button id="cancelLog">Cancel</button>\n            </div>\n        ',document.body.appendChild(t),this.elements.timerrs&&this.pauseTimer(),document.getElementById("confirmLog").addEventListener("click",(function(){e.logClaim()})),document.getElementById("cancelLog").addEventListener("click",(function(){document.body.removeChild(t),e.elements.timerrs&&e.resumeTimer()})),t.addEventListener("click",(function(n){n.target===t&&(document.body.removeChild(t),e.elements.timerrs&&e.resumeTimer())}))}},{key:"logClaim",value:function(){var e={timestamp:(new Date).toISOString(),claimNumber:this.getFieldValue(this.state.fields.accountNumber,"accountNumber"),scenario:this.getFieldValue(this.state.fields.scenario,"scenario"),duration:this.elements.timerrs?this.elements.timerrs.textContent:"N/A",content:this.elements.xOutput?this.elements.xOutput.innerHTML:""},t=JSON.parse(localStorage.getItem("allClaimLogs")||"[]");t.unshift(e),localStorage.setItem("allClaimLogs",JSON.stringify(t));var n=t.slice(0,10);localStorage.setItem("claimLogs",JSON.stringify(n)),window.location.reload()}},{key:"startTimer",value:function(){var e=this,t=0;this.timerInterval=setInterval((function(){t++;var n=Math.floor(t/3600),i=Math.floor(t%3600/60),a=t%60,s="".concat(n.toString().padStart(2,"0"),":").concat(i.toString().padStart(2,"0"),":").concat(a.toString().padStart(2,"0"));e.elements.timerrs&&(e.elements.timerrs.textContent=s)}),1e3)}},{key:"pauseTimer",value:function(){this.timerInterval&&clearInterval(this.timerInterval)}},{key:"resumeTimer",value:function(){this.startTimer()}},{key:"updateRecentClaims",value:function(){JSON.parse(localStorage.getItem("claimLogs")||"[]");var e=JSON.parse(localStorage.getItem("claimLogs")||"[]");document.querySelector(".claims-list").innerHTML=e.map((function(e){return'\n          <div class="claim-item">\n            <div class="claim-details">\n              <span class="claim-number">'.concat(e.claimNumber,'</span>\n              <span class="claim-scenario">').concat(e.scenario,'</span>\n            </div>\n            <div class="claim-meta">\n              <span class="claim-date">').concat(new Date(e.timestamp).toLocaleDateString(),'</span>\n              <span class="claim-duration">').concat(e.duration,"</span>\n            </div>\n          </div>\n        ")})).join("")}},{key:"handleCustomizeShortcuts",value:function(){}},{key:"debounce",value:function(e,t){var n;return function(){for(var i=this,a=arguments.length,s=new Array(a),r=0;r<a;r++)s[r]=arguments[r];clearTimeout(n),n=setTimeout((function(){return e.apply(i,s)}),t)}}},{key:"appendToInput",value:function(e){var t=e+this.elements.xInput.value;this.elements.xInput.value=t,this.handleInput({target:{value:t}}),this.updateTitle(" "),this.elements.xInput.scrollTop=0}}]),q={dark:{primary:"linear-gradient(rgba(255, 255, 255, 0.034), rgba(49, 49, 49, 0.425)), linear-gradient(to top, #000000, #0e0e0e, #111)",secondary:"#222222",accent:"#00B2B2",bg:"rgba(0, 0, 0, 0.911)",text:"#dbd7bc",greenField:"rgba(53, 255, 53, 0.1)"},light:{primary:"#FFFFFF",secondary:"#F0F4F8",accent:"#00B2B2",bg:"#E2E8F0",text:"#212121",greenField:"rgba(0, 200, 0, 0.1)"}};new(y((function e(){m(this,e),this.state={currentScheme:"dark"},this.init()}),[{key:"init",value:function(){var e=this;document.getElementById("colorSchemeToggle").addEventListener("click",(function(){return e.toggleColorScheme()})),this.updateColors()}},{key:"toggleColorScheme",value:function(){this.state.currentScheme="dark"===this.state.currentScheme?"light":"dark",this.updateColors(),this.updateToggleButton()}},{key:"updateColors",value:function(){var e=document.documentElement,t=q[this.state.currentScheme];e.classList.remove("light-mode","dark-mode"),e.classList.add(this.state.currentScheme+"-mode");for(var n=0,i=Object.entries(t);n<i.length;n++){var a=c(i[n],2),s=a[0],r=a[1];e.style.setProperty("--".concat(s),r)}}},{key:"updateToggleButton",value:function(){document.getElementById("colorSchemeToggle").textContent={dark:"🌙",light:"☀️"}[this.state.currentScheme]}}])),document.addEventListener("DOMContentLoaded",(function(){window.claimTool=new g}))},21:function(e,t,n){function i(e,t){(null==t||t>e.length)&&(t=e.length);for(var n=0,i=Array(t);n<t;n++)i[n]=e[n];return i}n.d(t,{_:function(){return r}});var a={"Damaged or Defective merchandise":"DFDM","Merchandise not received":"MNRC","Not as described":"NADR","Services not rendered":"SNRN",Misrepresentation:"MRPT","Cancelled recurring":"CNRX","Credit not processed":"CRNP","Deposit Adjustment":"DPAD","Deposit posting error":"DPST","Duplicate processing":"DPPR","Missing deposit":"MIDP",Overcharged:"OCHG","Paid by other means":"PBOM","Shorted funds":"SHFU","Account Take Over":"ATO","Third Party Inducement":"TPI","Counterfeit scenario":"Counterfeit","Counterfeit digital wallet":"Cnft Digital","Lost card":"Lost card","Stolen card":"Stolen card","Lost/Stolen digital wallet":"Lst/Stl Dgtl","Non Receipt of card":"Non Receipt","Unauthorized MOTO":"Unauth MOTO"},s={accountNumber:/Reference Number:\s*(\d+)/,scenario:new RegExp("Show Additional Information.*?(".concat(Object.keys(a).join("|"),")"),"i"),status:/Status(?:\s+Code)?:\s*((?:Provisional Credit Issued - Recovery Pending|Pending|Closed|Waiting Approval of Financial Transactions|Waiting for Approval of Denial)(?:\s+\(\d+\))?)/i,claimAmount:/Claim Amount:\s*(\$[\d,]+\.\d{2})/,customerSince:/Customer Since:\s*(\d{2}\/\d{2}\/\d{4})/,dateOfBirth:/Birth Date:\s*(\d{2}\/\d{2}\/\d{4})/,openDate:/Open Date:?\s*(\d{2}\/\d{2}\/\d{4})/i,ytdAvgBal:/Average Balance YTD[:\s]*\$?([\d,]+\.?\d*)/i,nsf:/OD\/NSF Occurrences Past 12 Months[:\s]*(\d+)/i,transactionDate:/Transactions:[\s\S]*?Date[\s\S]*?(\d{2}\/\d{2}\/\d{4})/};function r(e){var t={};return Object.entries(s).forEach((function(n){var s,r=function(e){if(Array.isArray(e))return e}(s=n)||function(e){var t=null==e?null:"undefined"!=typeof Symbol&&e[Symbol.iterator]||e["@@iterator"];if(null!=t){var n,i,a,s,r=[],o=!0,l=!1;try{for(a=(t=t.call(e)).next;!(o=(n=a.call(t)).done)&&(r.push(n.value),2!==r.length);o=!0);}catch(e){l=!0,i=e}finally{try{if(!o&&null!=t.return&&(s=t.return(),Object(s)!==s))return}finally{if(l)throw i}}return r}}(s)||function(e){if(e){if("string"==typeof e)return i(e,2);var t={}.toString.call(e).slice(8,-1);return"Object"===t&&e.constructor&&(t=e.constructor.name),"Map"===t||"Set"===t?Array.from(e):"Arguments"===t||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t)?i(e,2):void 0}}(s)||function(){throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}(),o=r[0],l=r[1],u=e.match(l);u&&(t[o]="scenario"===o?a[u[1]]||u[1]:u[1].trim())})),t.disputeCategory=function(e){return["Account Take Over","Third Party Inducement","Counterfeit","Lost","Non Receipt of card","Unauthorized MOTO"].some((function(t){return e.includes(t)}))?"Fraud":"Non-Fraud"}(e),t.sixtyDayLiability=e.includes("Meets 60 day liability rule")?"Yes":"No",t.moreThanTwoYears=function(e){if(!e)return"Unable to determine";var t=new Date(e),n=new Date;return n.setFullYear(n.getFullYear()-2),t<n?"Yes":"No"}(t.transactionDate),t}},124:function(){},487:function(){}},n={};function i(e){var a=n[e];if(void 0!==a)return a.exports;var s=n[e]={exports:{}};return t[e](s,s.exports,i),s.exports}i.d=function(e,t){for(var n in t)i.o(t,n)&&!i.o(e,n)&&Object.defineProperty(e,n,{enumerable:!0,get:t[n]})},i.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},i(296),i(967),i(21),i(124),i(487)}()})();</script></body></html>
