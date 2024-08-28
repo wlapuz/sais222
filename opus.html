@@ -1,0 +1,2972 @@
+<!doctype html><html lang="en"><head><style>/* Scrollbar Styles */
+::-webkit-scrollbar {
+    width: 3px;
+    height: 5px;
+    opacity: 0;
+}
+
+.intro-container{position:fixed;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;
+    background: black;
+    ;z-index:1000;transition:opacity 1s}
+    .intro-text{font-size:6rem;font-weight:300}
+    .signature{font-size:2rem;font-weight:300}
+    .intro-text,.signature{opacity:0;transform:translateY(40px);animation:fadeInUp 2s forwards}
+    .signature{animation-delay:1s}
+    .char{display:inline-block;opacity:0;transform:translateY(40px);animation:charAnimation .5s forwards;transition:.3s}
+    .char:hover{color:#FF69B4;text-shadow:0 0 10px #FF69B4;transform:translateY(-5px)}
+    .skip-intro{position:absolute;bottom:20px;right:20px;color:rgba(255, 255, 255, 0.233);font-size:3rem}
+    @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+    @keyframes charAnimation{to{opacity:1;transform:translateY(0)}}
+
+:root {
+    --gap: 12px;
+    --border-radius: 12px;
+    --primary: linear-gradient(rgba(255, 255, 255, 0.034), rgba(49, 49, 49, 0.425)),
+               linear-gradient(to top, #000000, #0e0e0e, #111);
+    --secondary: #222222;
+    --bg: rgba(0, 0, 0, 0.911);
+    --text: #dbd7bc;
+    --transition: all 0.3s;
+
+    /* Dark mode (default) */
+    --green-bg: rgba(53, 255, 53, 0.1);
+    --red-bg: rgba(255, 62, 62, 0.1);
+    --warning-bg: rgba(255, 165, 0, 0.1);
+    --green-text: #35ff35;
+    --red-text: #ff3434;
+    --warning-text: #ffaf1b;
+    --not-needed-bg: rgba(255, 255, 255, 0.1);
+    --not-needed-text: #ffffff;
+
+    /* New variables */
+    --hover-bg: rgba(255, 255, 255, 0.2);
+    --special-field-bg: var(--secondary);
+    --input-bg: rgba(255, 255, 255, 0.1);
+    --border-color: rgba(255, 255, 255, 0.2);
+    --button-bg: rgba(255, 255, 255, 0.1);
+    --selected-button-bg: rgba(0, 178, 178, 0.5);
+    --selected-button-border: var(--accent);
+
+    --ca-bg-dark: #121212;
+    --ca-bg-light: #1E1E1E;
+    --ca-text-primary: #FFFFFF;
+    --ca-text-secondary: #B3B3B3;
+    --ca-accent: #BB86FC;
+    --ca-error: #CF6679;
+    --ca-success: #03DAC5;
+}
+
+/* General Styles */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body, html {
+    height: 100vh;
+    font-family: 'Segoe UI', Geneva, Verdana, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    scroll-behavior: smooth;
+    font-size: 12px;
+    display: grid;
+}
+
+#fillButton, #fill2Button{
+    position:absolute;
+    left:30%;
+}
+#fill2Button{
+    left:50%!important;
+}
+
+/* Layout */
+.container {
+    display: grid;
+    height: 100vh;
+    grid-template-columns: 1.9fr 1fr 1fr;
+    gap: var(--gap);
+    padding: 30px;
+    width:100%;
+}
+
+.main, .middle, .utilities {
+    display: grid;
+    gap: var(--gap);
+    width:100%;
+    height:100%;
+    overflow-y: hidden;
+}
+
+.main { position: relative; grid-template-rows: 1fr 0.6fr 0.2fr; }
+.middle { grid-template-rows: 0.15fr 1.5fr 0.2fr; }
+#Decisionings{ overflow-y: hidden; grid-template-rows: 5fr 0.1fr!important; padding:5px;}
+.utilities { grid-template-rows: 1fr 0.6fr 0.2fr; }
+
+.paralyser {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--gap);
+    overflow: hidden;
+    position: relative;
+    height: 100%;
+}
+
+/* Box Styles */
+.box {
+    overflow-y: auto;
+    display: grid;
+    background: var(--primary);
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+    opacity: 0.8;
+    position: relative;
+    height: 100%;
+}
+
+/* Input and Result Styles */
+#xResult {
+    position: relative;
+    top: 0;
+    left: 0;
+    background-color: var(--bg);
+    color: var(--text);
+    height:100%;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    padding: 10px;
+}
+
+.input-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10;
+    pointer-events: none;
+}
+
+#xInput {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.075);
+    color: rgba(0, 0, 0, 0.342);
+    border: none;
+    padding: 20px;
+    font-size: 16px;
+    border-radius: var(--border-radius);
+    resize: none;
+    pointer-events: auto;
+    backdrop-filter: blur(50px);
+}
+
+.content-wrapper{
+    display:grid;
+    grid-template-rows: 0.1fr 0.9fr;
+    padding:5px;
+    position: relative;
+}
+
+#xResult {
+    gap: 10px;
+    background-color: var(--secondary)!important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    margin:0px 0px;
+    border-radius: 12px;
+    max-height:98%!important;
+    margin-top:10px;
+}
+
+/* Field Styles */
+.field-container {
+    font-size: 12px;
+    break-inside: avoid-column;
+    page-break-inside: avoid;
+    transition: background-color 0.5s ease, color 0.5s ease;
+    cursor: pointer;
+    position: relative;
+    padding: 5px;
+    border-radius: var(--border-radius);
+    min-width: 85px;
+    background-color: var(--secondary);
+}
+
+.field-label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 2px;
+    pointer-events: none;
+}
+
+.field-value {
+    background: transparent;
+    border: none;
+    width: 100%;
+    word-break: break-word;
+    display: block;
+    resize: none;
+    transition: background-color 0.3s ease;
+    color: inherit;
+    overflow: hidden;
+    height: 12px;
+    line-height: 1;
+    pointer-events: none;
+}
+
+/* Button Styles */
+button {
+    padding: 0 20px;
+    background-color: var(--secondary);
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+    transition: 0.2s ease-out;
+    height: 30px;
+    line-height: 30px;
+    border-radius: 12px;
+    opacity: 0.9;
+    position: inherit;
+}
+
+button:hover {
+    opacity: 1;
+    background-color: var(--accent);
+}
+
+#timerSegments button {
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box; 
+  }
+  
+  #timerSegments {
+    width: 100%; 
+    display: flex; 
+    justify-content: space-between; 
+    padding:5px;
+    gap:5px;
+  }
+
+shrt-buttons{
+    display: grid;
+    gap: 5px; 
+    grid-template-columns: 9fr 1fr;
+    height:100%;
+    padding:5px;
+}
+
+#gear{
+    height:100%;
+    font-size: 20px;
+}
+
+    sbbox {     
+    display: grid;
+    gap: 5px; 
+    grid-template-rows: 1fr 1fr; 
+    height:100%; gap:5px;
+    overflow-y: hidden;
+}
+
+    sb1r button, sb2r button{
+        height:100%;
+    }
+
+    lower-output{
+        display: grid;
+        grid-template-columns: 4fr 1fr;
+        height:100%;
+        padding:5px;
+        gap:5px;
+    }
+
+    lower-output button{
+        height:100%;
+    }
+
+    .box #timer{
+        height:100%;
+        z-index: 0;
+        background-color: var(--secondary);
+        opacity: 0.8;
+        font-size: 30px;
+    }
+
+    #timerrs{
+        height:100%;
+        z-index: 0;
+        background-color: var(--secondary);
+        opacity: 1;
+        top:0;
+        padding:5px;
+    }
+
+    .box#notings {
+        display: flex;
+        height: 100%;
+        overflow: hidden;
+    }
+    
+    .content-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background-color: var(--primary);
+        border-radius: var(--border-radius) 0 0 var(--border-radius);
+        overflow: hidden;
+    }
+    
+    .tab-container {
+        display: grid;
+        grid-template-rows: 1fr 1fr;
+        background-color: var(--primary);
+        border-radius: 0 var(--border-radius) var(--border-radius) 0;
+        padding: 0px 5px;
+        
+    }
+    
+    .tab-button {
+        height:100%;
+        padding: 10px;
+        background: none;
+        border: none;
+        color: var(--text);
+        cursor: pointer;
+        transition: background-color 0.3s;
+        border-radius: var(--border-radius);
+        margin-bottom: 5px;
+        font-size: 20px;
+    }
+    
+    .tab-button:last-child {
+        margin-bottom: 0;
+    }
+    
+    .tab-button.active {
+        background-color: var(--secondary);
+    }
+    
+    #notepad-view, #calculator-view {
+        flex: 1;
+        display: flex;
+        flex-direction: column-reverse;
+        padding: 0px;
+        overflow-y: auto;
+    }
+
+    #calculator-view {
+        flex-direction: column!important;
+    }
+    
+    /* Notepad styles */
+    .notepad-controls {
+        display: flex;
+        flex-direction:reverse;
+        gap: 5px;
+        margin-top: 5px;
+    }
+    
+    .format-btn, #save-note {
+        padding: 0px 10px;
+        background-color: var(--button-bg);
+        color: var(--text);
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        height:25px;
+        transition: background-color 0.3s;
+    }
+    
+    .format-btn:hover, #save-note:hover {
+        background-color: var(--accent);
+    }
+    
+    #notepad {
+        flex: 1;
+        background-color: var(--secondary);
+        color: var(--text);
+        border: transparent;
+        border-radius: 12px;
+        padding: 15px;
+        overflow-y: auto;
+    }
+
+    #notepad:focus{
+        outline: transparent;
+    }
+    
+    /* Calculator styles */
+    #calc-display {
+        background-color: var(--input-bg);
+        color: var(--text);
+        padding: 10px;
+        text-align: right;
+        font-size: 1.5em;
+        border-radius: 5px;
+        min-height: 2em;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+    
+    .calc-buttons {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 5px;
+    }
+    
+    .calc-btn {
+        padding: 0px;
+        background-color: var(--button-bg);
+        color: var(--text);
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        height:auto;
+    }
+    
+    .calc-btn:hover {
+        background-color: var(--accent);
+    }
+    
+    .calc-btn[data-action="equals"] {
+        grid-row: span 2;
+    }
+
+    #notepad.placeholder {
+        color: gray; /* Or any style you prefer */
+      }
+
+
+      shrt-buttons.box {
+        display: grid;
+        grid-template-columns: 9fr 1fr;
+        gap: 5px;
+        padding: 5px;
+    }
+    
+    sbbox {
+        display: grid;
+        grid-template-rows: 1fr 1fr;
+        gap: 5px;
+    }
+    
+    sb1r, sb2r {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 5px;
+    }
+    
+    .shortcut-btn {
+        position: relative;
+        height: 95%;
+        font-size: 14px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        overflow: hidden;
+        text-align: center;
+        padding: 5px;
+    }
+    
+    .shortcut-btn::after {
+        content: attr(data-shortcut);
+        position: absolute;
+        bottom: -6px;
+        right: 6px;
+        font-size: 10px;
+        opacity: 0.7;
+    }
+
+    @keyframes buttonPress {
+        0% { transform: scale(1); }
+        50% { transform: scale(0.95); }
+        100% { transform: scale(1); }
+      }
+      
+      .button-press-animation {
+        animation: buttonPress 0.3s ease;
+      }
+
+    .shortcut-btn:hover {
+        background-color: var(--accent)!important;
+    }
+    
+    #gear {
+        font-size: 20px;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 5;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.4);
+        backdrop-filter: blur(5px);
+    }
+    
+    .modal-content {
+        background-color: var(--secondary);
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid var(--accent);
+        width: 300px;
+        color: var(--text);
+    }
+    
+    .modal-content input, .modal-content textarea, .modal-content select {
+        width: 100%;
+        margin-bottom: 10px;
+        padding: 5px;
+        background-color: var(--input-bg);
+        color: var(--text);
+        border: 1px solid var(--border-color);
+    }
+    
+    .modal-content button {
+        padding: 5px 10px;
+        margin-right: 10px;
+        background-color: var(--button-bg);
+        color: var(--text);
+        border: none;
+        cursor: pointer;
+    }
+
+    .input-container {
+        position: relative;
+        margin-bottom: 10px;
+    }
+    
+    #charCount {
+        position: absolute;
+        right: 5px;
+        bottom: 5px;
+        font-size: 12px;
+        color: var(--text);
+        opacity: 0.7;
+    }
+
+    #clearAllModal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.4);
+    }
+    
+    #clearAllModal .modal-content {
+        background-color: var(--secondary);
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid var(--accent);
+        width: 300px;
+        color: var(--text);
+        text-align: center;
+    }
+    
+    #clearAllModal button {
+        margin: 10px;
+        padding: 5px 10px;
+        background-color: var(--button-bg);
+        color: var(--text);
+        border: none;
+        cursor: pointer;
+    }
+    
+    #clearAllModal button:hover {
+        background-color: var(--accent);
+    }
+
+    .copy-btn {
+        position: relative;
+        padding: 10px 20px;
+        font-size: 16px;
+        color: var(--text);
+        background-color: var(--secondary);
+        border: none;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .copy-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .copy-btn:active {
+        transform: translateY(0);
+    }
+    
+    .copy-text, .copy-icon {
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+    
+    .copy-icon {
+        position: absolute;
+        right: 20px;
+        opacity: 0;
+    }
+    
+    .copy-btn:hover .copy-text {
+        transform: translateX(-0px);
+    }
+    
+    .copy-btn:hover .copy-icon {
+        opacity: 1;
+        transform: translateX(-0px);
+    }
+    
+    @keyframes ripple {
+        0% {
+            transform: scale(0);
+            opacity: 1;
+        }
+        100% {
+            transform: scale(100);
+            opacity: 0;
+        }
+    }
+    
+    .copy-btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 5px;
+        height: 5px;
+        background: rgba(255, 255, 255, 0.5);
+        opacity: 0;
+        border-radius: 100%;
+        transform: scale(1, 1) translate(-0%);
+        transform-origin: 50% 50%;
+    }
+    
+    .copy-btn:focus:not(:active)::after {
+        animation: ripple 1s ease-out;
+    }
+    
+    @keyframes checkmark {
+        0% {
+            transform: scale(0);
+        }
+        50% {
+            transform: scale(1.2);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+    
+    .copy-btn.copied .copy-icon {
+        animation: checkmark 0.5s ease-in-out;
+    }
+    
+    .copy-btn.copied {
+        background-color: var(--accent);
+    }
+
+
+/* Existing styles... */
+#xOutput::before {
+    content: attr(data-watermark);
+    position: absolute;
+    top: 50%;
+    right: -20px;
+    transform: translateY(-50%) rotate(-90deg);
+    font-size: 24px;
+    color: rgba(128, 128, 128, 0.2);
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 1;
+}
+
+#xOutput::before {
+    content: "Output";
+}
+
+/* Ensure the content is above the watermark */
+#xAnalysis, #xD, #xOutput {
+    position: relative;
+    z-index: 2;
+}
+
+/* Adjustments for specific elements */
+#xAnalysis, #xD, #xOutput {
+    padding-right: 40px; /* Ensure content doesn't overlap with watermark */
+}
+
+
+/* Existing styles... */
+
+/* Default red state for specific fields */
+.field-container[data-field="withdrew"],
+.field-container[data-field="merchantCredit"],
+.field-container[data-field="duplicateClaim"],
+.field-container[data-field="pcUsedToFundOtherClaims"],
+.field-container[data-field="unusualDepositPriorToReporting"],
+.field-container[data-field="matchingAdjustment"],
+.field-container[data-field="claimsFiledLess1yr"],
+.field-container[data-field="immediateUseOfFunds"] {
+    background-color: var(--red-bg);
+}
+
+.field-container[data-field="withdrew"] .field-label,
+.field-container[data-field="merchantCredit"] .field-label,
+.field-container[data-field="duplicateClaim"] .field-label,
+.field-container[data-field="pcUsedToFundOtherClaims"] .field-label,
+.field-container[data-field="unusualDepositPriorToReporting"] .field-label,
+.field-container[data-field="matchingAdjustment"] .field-label,
+.field-container[data-field="claimsFiledLess1yr"] .field-label,
+.field-container[data-field="immediateUseOfFunds"] .field-label {
+    color: var(--red-text);
+}
+
+/* Green state for interacted fields */
+.field-container[data-field="withdrew"].interacted,
+.field-container[data-field="merchantCredit"].interacted,
+.field-container[data-field="duplicateClaim"].interacted,
+.field-container[data-field="pcUsedToFundOtherClaims"].interacted,
+.field-container[data-field="unusualDepositPriorToReporting"].interacted,
+.field-container[data-field="matchingAdjustment"].interacted,
+.field-container[data-field="claimsFiledLess1yr"].interacted,
+.field-container[data-field="immediateUseOfFunds"].interacted {
+    background-color: var(--green-bg);
+}
+
+#xResult > div.special-fields > div.field-container.special-field.interacted.red > div.label-container > span, #xResult > div.special-fields > div:nth-child(3), #xResult > div.special-fields > div:nth-child(2),#xResult > div.special-fields > div:nth-child(1){
+    color: var(--red-text)!important;
+    background-color: var(--red-bg)
+}
+
+.field-container[data-field="withdrew"].interacted .field-label,
+.field-container[data-field="merchantCredit"].interacted .field-label,
+.field-container[data-field="duplicateClaim"].interacted .field-label,
+.field-container[data-field="pcUsedToFundOtherClaims"].interacted .field-label,
+.field-container[data-field="unusualDepositPriorToReporting"].interacted .field-label,
+.field-container[data-field="matchingAdjustment"].interacted .field-label,
+.field-container[data-field="claimsFiledLess1yr"].interacted .field-label,
+.field-container[data-field="immediateUseOfFunds"].interacted .field-label {
+    color: var(--green-text);
+}
+
+.warning-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.warning-content {
+    background-color: var(--bg);
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 400px;
+    text-align: center;
+}
+
+.warning-content h2 {
+    color: var(--warning-text);
+    margin-bottom: 10px;
+}
+
+.warning-content ul {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.warning-content button {
+    margin: 0 10px;
+    padding: 5px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#confirmCopy {
+    background-color: var(--accent);
+    color: var(--bg);
+}
+
+#cancelCopy {
+    background-color: var(--red-bg);
+    color: var(--text);
+}
+
+.log-confirmation-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.popup-content {
+    background-color: var(--secondary);
+    padding: 20px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.popup-content button {
+    margin: 10px;
+    padding: 5px 15px;
+}
+
+.recent-claims-container {
+    background-color: var(--secondary);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    overflow-y: auto;
+    margin: 5px 0px;
+  }
+  
+  .recent-claims-container h2 {
+    font-size: 1.2rem;
+    color: var(--accent);
+  }
+
+  #recentGrid{
+    display: grid;
+    grid-template-rows: 0.1fr 0.75fr 1.5fr;
+    padding:5px;
+    height:100%;
+  }
+  
+  .claims-list {
+    display: flex;
+    flex-direction: column;
+    gap:5px;
+    padding:0px;
+  }
+  
+  .claim-item {
+    background-color: var(--primary);
+    border-radius: 8px;
+    padding: 6px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 12px;
+    align-items: center;
+    transition: background-color 0.3s ease;
+  }
+  
+  
+  .claim-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  
+  .claim-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .claim-number {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  
+  .claim-scenario {
+    font-size: 0.9rem;
+    color: var(--text);
+    opacity: 0.7;
+  }
+  
+  .claim-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+  }
+  
+  .claim-date, .claim-duration {
+    font-size: 0.8rem;
+    color: var(--text);
+    opacity: 0.6;
+  }
+
+  .copy-btn, .log-claim-btn {
+    position: relative;
+    padding-right: 40px; /* Make room for the shortcut hint */
+  }
+  
+  .shortcut-hint {
+    position: absolute;
+    right: 4px;
+    bottom: 0px;
+    font-size: 0.7em;
+    opacity: 0.7;
+    padding: 2px 4px;
+  }
+
+  .claim-archive-overlay {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.8);
+    backdrop-filter: blur(5px);
+}
+
+.claim-archive-panel {
+    background-color: var(--bg-color);
+    margin: 2% auto;
+    width: 95%;
+    max-width: 1400px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    animation: archivePanelFadeIn 0.3s;
+}
+
+@keyframes archivePanelFadeIn {
+    from { opacity: 0; transform: translateY(-50px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.claim-archive-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: var(--card-bg);
+    border-radius: 12px 12px 0 0;
+}
+
+.claim-archive-header h2 {
+    color: var(--accent-light);
+    font-size: 1.5rem;
+    margin: 0;
+}
+
+.claim-archive-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.claim-archive-close:hover {
+    color: var(--text-color);
+}
+
+.claim-archive-content {
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    
+}
+
+#claimArchiveOverlay > div > div > div > div:nth-child(1){
+    height:500px;
+    overflow-y: auto;
+}
+
+.card {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+    background-color: var(--card-hover);
+}
+
+.card h2 {
+    color: var(--accent-light);
+    font-size: 1.25rem;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+}
+
+
+#claimArchiveList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.claim-archive-item {
+    background-color: var(--ca-bg-light);
+    border-radius: 8px;
+    padding: 15px;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.claim-archive-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+}
+
+.claim-archive-item h3 {
+    color: var(--ca-accent);
+    margin-top: 0;
+}
+
+.claim-archive-item p {
+    color: var(--ca-text-secondary);
+    margin: 5px 0;
+}
+
+.claim-archive-item details {
+    margin-top: 10px;
+}
+
+.claim-archive-item summary {
+    color: var(--ca-text-primary);
+    cursor: pointer;
+    user-select: none;
+}
+
+.claim-archive-item pre {
+    background-color: var(--ca-bg-dark);
+    border-radius: 4px;
+    padding: 10px;
+    overflow-x: auto;
+    color: var(--ca-text-secondary);
+    font-size: 0.9rem;
+}
+
+
+#xInput::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+    font-style: italic;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    text-align: center;
+    width: 80%;
+
+}
+
+/* Adjust existing styles */
+.paralyser, #Decisionings {
+    position: relative;
+    z-index: 1;
+}
+
+/* Show xResult and xD when xInput is not empty */
+.input-overlay:not(:empty) ~ .box #xResult,
+.input-overlay:not(:empty) ~ .box #xD {
+    pointer-events: auto;
+}
+
+.chart-container{
+    height:100%;
+    display:flex;
+    color: var(--text);
+}
+
+#hourlyClaimDashB {
+    display: flex;
+    flex-direction: column;
+    padding: 0px;
+    height:auto;
+
+}
+
+#hourlyClaimDashB .dashboard-title {
+    font-size: 1.2rem;
+    margin-bottom: 0px;
+    color: var(--accent);
+}
+
+#hourlyClaimDashB .chart-container {
+    height:85%;
+    width: 100%;
+    position: relative;
+
+}
+
+#hourlyClaimDashB .toggle-view {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+#hourlyClaimDashB .toggle-btn {
+    background-color: var(--secondary);
+    border: none;
+    color: var(--text);
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#hourlyClaimDashB .toggle-btn.active {
+    background-color: var(--accent);
+}
+
+#hourlyClaimDashB .info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 5px;
+    margin-top: 0px;
+}
+
+#hourlyClaimDashB .info-card {
+    background-color: var(--secondary);
+    padding: 10px;
+    border-radius: 8px;
+}
+
+#hourlyClaimDashB .info-card-title {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+}
+
+#hourlyClaimDashB .info-card-value {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+#hourlyClaimDashB .trend {
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+}
+
+#hourlyClaimDashB .trend-up {
+    color: var(--green-text);
+}
+
+#hourlyClaimDashB .trend-down {
+    color: var(--red-text);
+}
+.account-number-field {
+    background-color: rgba(0, 178, 178, 0.1);
+    border-radius: 12px;
+    margin-bottom: 6px;
+}
+
+.account-number-container {
+    grid-column: 1 / -1;
+}
+
+.account-number-container .field-container {
+    background-color: rgba(0, 178, 178, 0.1);
+    border: transparent;
+}
+
+.regular-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+    margin-bottom: 5px;
+}
+
+.special-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background-color: var(--secondary);
+}
+
+.reset-btn {
+  position: absolute;
+  height: 20px;
+  right: 0;
+  margin:5px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.field-container {
+    font-size: 12px;
+    break-inside: avoid-column;
+    page-break-inside: avoid;
+    transition: background-color 0.5s ease, color 0.5s ease;
+    cursor: pointer;
+    position: relative;
+    padding: 5px;
+    border-radius: 8px;
+    min-width: 85px;
+    background-color: rgba(196, 196, 196, 0.1);
+}
+
+.field-label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 2px;
+    pointer-events: none;
+}
+
+.field-value {
+    background: transparent;
+    border: none;
+    width: 100%;
+    word-break: break-word;
+    display: block;
+    resize: none;
+    transition: background-color 0.3s ease;
+    color: inherit;
+    overflow: hidden;
+    height:12px;
+    line-height: 1; /* Adjust as needed */
+    pointer-events: none;
+}
+
+.field-container:focus-within .field-value {
+    pointer-events: auto;
+}
+
+/* This hidden checkbox will help us manage the focus state */
+.field-focus-control {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* When the hidden checkbox is checked, focus the input */
+.field-focus-control:checked + .field-value {
+    pointer-events: auto;
+}
+
+.field-focus-control:checked + .field-value:focus {
+    outline: none;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.field-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+}
+
+.field-container.regular-field.green {
+    background-color: var(--green-bg);
+}
+
+.field-container.regular-field.red {
+    background-color: var(--red-bg);
+}
+
+.field-container.regular-field.warning {
+    background-color: var(--warning-bg);
+}
+
+.field-container.green {
+    background-color: var(--green-bg) !important;
+}
+
+.field-container.red {
+    background-color: var(--red-bg) !important;
+}
+
+.field-container.warning {
+    background-color: var(--warning-bg) !important;
+}
+
+.field-container.green .field-label,
+.field-container.green .field-value {
+    color: var(--green-text);
+}
+
+.field-container.red .field-label,
+.field-container.red .field-value {
+    color: var(--red-text);
+}
+
+.field-container.warning .field-label,
+.field-container.warning .field-value {
+    color: var(--warning-text);
+}
+
+.field-container:hover,
+.field-container:focus-within,
+.field-container.special-field:hover {
+    background: var(--hover-bg);
+}
+
+.field-container.special-field {
+    background-color: var(--secondary);
+    transition: background-color 0.3s ease;
+    max-height: 85px;
+    display: grid;
+    padding: 5px;
+    gap: 0px;
+    overflow-y: hidden;
+}
+
+.field-container.special-field.green {
+    background-color: var(--green-bg);
+}
+
+.field-container.special-field.red {
+    background-color: var(--red-bg);
+}
+
+.field-container.special-field .label-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.field-container.special-field .buttons-container,
+.field-container.special-field .secondary-buttons {
+    display: grid;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.field-container.special-field .secondary-buttons {
+    display: none;
+}
+
+.field-container.special-field .details-input {
+    display: none;
+    margin-top: 5px;
+    width: 100%;
+    background-color: var(--input-bg);
+    color: var(--text);
+    border: transparent;
+    padding: 5px;
+    border-radius:10px;
+}
+
+.field-container textarea.field-value {
+    width: 100%;
+    overflow-y: auto;
+}
+
+.field-container.special-field button {
+    background-color: var(--button-bg);
+    color: var(--text);
+    border: transparent;
+    transition: all 0.3s ease;
+    padding: 2px 10px;
+    font-size: 12px;
+    height: 24px;
+    line-height: 24px;
+}
+
+.field-container.special-field button.selected {
+    background-color: var(--selected-button-bg);
+    color: white;
+    border-color: var(--selected-button-border);
+}
+
+.title-bar {
+    max-height: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 15px 15px 0 0;
+    color: var(--accent);
+    font-weight: bold;
+    padding-top: 5px;
+    margin-bottom:5px;
+    z-index: 3;
+    background-color: var(--primary);
+    font-size: 20px;
+}
+
+button {
+    padding: 0 20px;
+    background-color: var(--secondary);
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+    transition: 0.2s ease-out;
+    height: 30px;
+    line-height: 30px;
+    border-radius: 9px;
+    opacity: 0.9;
+    position: inherit;
+}
+
+button:hover {
+    opacity: 1;
+    background-color: var(--accent);
+}
+
+button:active {
+    background-color: var(--accent);
+}
+
+/*Analyzer*/
+.content.result-wrapper{
+    display: grid;
+    grid-template-rows: 0.1fr 1fr 1fr;
+    gap: 5px;
+    height: 100%;
+    overflow-y: auto;
+    width:100%;
+    padding:5px;
+}
+
+#xAnalysis{
+    resize: none;
+    overflow-y: auto;
+    background-color: var(--secondary);
+    border: none;
+    color: var(--text);
+    padding: 10px;
+    border-radius: 12px;
+    width: 100%;
+    min-height:200px;
+}
+
+.analysis-container {
+    overflow-y: auto;
+    position: relative;
+    display: grid;
+    height:100%;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+    width: 100%;
+    padding:5px;
+    background-color: var(--primary);
+    border-radius: 12px;
+    min-height:200px;
+}
+
+.analysis-field-container {
+    display: grid;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px;
+    background-color: rgba(196, 196, 196, 0.1);
+    border-radius: 12px;
+    transition: background-color 0.3s;
+}
+
+.question-text {
+    margin-right: 10px;
+}
+
+.answer-input {
+    flex: 1;
+    padding: 5px;
+    border: transparent;
+    border-radius: 12px;
+    max-width: 100px;
+}
+
+.toggle-button {
+    padding: 5px 12px;
+    background-color: #f0f0f0;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.analysis-field-container.not-needed .answer-input,
+.analysis-field-container.more-info .answer-input {
+    display: none;
+}
+
+.analysis-field-container.more-info {
+    background-color: var(--warning-bg);
+    color: var(--warning-text);
+}
+.analysis-field-container.has-value {
+    background-color: var(--green-bg);
+    color: var(--green-text);
+}
+
+.analysis-field-container.has-value.more-info {
+    background-color: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+#selectAllContainer {
+    position: relative;
+    z-index: 10;
+}
+
+#selectAll{
+    width:100%;
+}
+
+#selectAllActions button {
+    padding: 5px 10px;
+    cursor: pointer;
+    width:100%!important;
+}
+
+.analysis-field-container {
+    transition: all 0.3s ease;
+}
+
+.analysis-field-container.not-needed {
+    background-color: var(--not-needed-bg);
+    color: var(--not-needed-text);
+    text-decoration: line-through;
+}
+
+.analysis-field-container.not-needed .answer-input {
+    display: none;
+}
+
+.analysis-field-container:active {
+    transform: scale(0.98);
+}
+
+.analysis-field-container.f.red,
+.analysis-field-container.f.green {
+    cursor: pointer;
+}
+
+.analysis-field-container.f.red {
+    background-color: var(--red-bg);
+    color: var(--red-text);
+}
+
+.analysis-field-container.f.green {
+    background-color: var(--green-bg);
+    color: var(--green-text);
+}
+
+.fraud-field-container {
+    margin-top: 5px;
+}
+
+.fraud-input {
+    margin-top: 5px;
+    width: 100%;
+    padding: 5px;
+    border: transparent;
+    border-radius: 8px;
+    background-color: var(--input-bg);
+    color: var(--text);
+}
+
+.answer-input{
+    margin-top: 5px;
+    width: 100%;
+    padding: 5px;
+    border: transparent;
+    border-radius: 8px;
+    background-color: var(--input-bg);
+    color: var(--text);
+}
+
+.analysis-field-container.f.placeholder {
+    background-color: #808080;
+    color: #ffffff;
+    opacity: 0.7;
+}
+
+.analysis-field-container.f.placeholder .fraud-input {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}
+/**/
+
+#logs-popup {
+    display: none;
+}
+
+/*Decision*/
+
+#xD, .box .notepad{
+    resize: none;
+    overflow-y: auto;
+    background-color: var(--secondary);
+    border: none;
+    color: var(--text);
+    padding: 20px;
+    width: 100%;
+    border-radius:12px;
+}
+
+#notings{
+    padding:5px!important;
+    width:100%;
+}
+
+.title-bar #bigsteppers {
+    display: flex;
+}
+
+#bigsteppers button {
+    font-size: 12px;
+    opacity: 1;
+    border: none;
+    font-weight: bold;
+    border-radius: 10px;
+    background-color: #4a4a4a;
+    color: white;
+    cursor: pointer;
+    position: relative;
+    transition: opacity 0.3s, transform 0.1s;
+    padding: 0px 10px;
+}
+
+#bigsteppers button:hover {
+    opacity: 0.5;
+}
+
+#bigsteppers button:active {
+    transform: translateY(0);
+}
+
+.button-container {
+    display: grid;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+textarea:focus {
+    outline: transparent;
+  }
+  
+.step-indicator {
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    color: #333;
+    opacity: 0;
+    font-size: 8px;
+    border-radius: 8px;
+    font-weight: bold;
+    height: 20px;
+    width: auto;
+    padding: 0 10px;
+    background-color: #00B2B2;
+}
+/*END OF DECISION*/
+
+/*START OF OUTPUT! SAWAKAS*/
+#xOutput {
+    background-color: var(--not-needed-bg);
+    border-radius: 12px;
+    opacity: 1;
+    display: block;
+    color: var(--text);
+    padding: 20px; /* Add some padding */
+    overflow: auto; /* In case content exceeds the container */
+    font-family:Verdana;
+    outline: transparent;
+    z-index: 1;
+    border: solid 5px var(--secondary);
+}
+
+h2,h1 {
+    text-decoration: underline;
+    color:rgb(102, 102, 102);
+    font-size:small;
+    margin-bottom: 5px;
+  }
+
+  h3 {
+    color:rgb(102, 102, 102);
+    font-size:small;
+    margin-bottom: 0px;
+  }</style><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Claim Review and Management Tool</title><script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script><script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script><div id="logs-popup" class="popup"><button class="close-popup">Close</button><div class="popup-content"><h2>All Logs</h2><p>Logs content goes here...</p></div></div><button id="fillButton" hidden>Test Fill</button> <button id="fill2Button" hidden>Test Fill 2</button><div id="intro-container" class="intro-container"><div id="intro-text" class="intro-text">こんにちは</div><div id="signature" class="signature">SAIS by Wilmer</div><div class="skip-intro">Press any key to skip</div></div><div id="claimArchiveOverlay" class="claim-archive-overlay"><div class="claim-archive-panel"><header class="claim-archive-header"><h2>Claim Archive Dashboard</h2><button class="claim-archive-close">&times;</button></header><div class="claim-archive-content"><div class="dashboard"><div class="card"><h2>Recent Claims</h2><div class="claims-list" id="claimsList"></div></div><div class="card"><h2>Claim Overview</h2><div class="date-range"><input type="date" id="start-date"> <input type="date" id="end-date"></div><div class="stats-grid"><div class="stat-item"><div class="stat-value" id="total-claims">0</div><div class="stat-label">Total Claims</div></div><div class="stat-item"><div class="stat-value" id="avg-handling-time">0 min</div><div class="stat-label">Avg. Handling Time</div></div><div class="stat-item"><div class="stat-value" id="claims-per-day">0</div><div class="stat-label">Claims/Day</div></div></div><div class="chart-container"><canvas id="scenarioChart"></canvas></div><button class="export-btn" id="export-csv" style="left:25%!important; width:50%; position:absolute!important;">Export to CSV</button></div><div class="card"><h2>Handling Time Analysis</h2><div class="chart-container"><canvas id="handlingTimeChart"></canvas></div></div><div class="card"><h2>Daily Performance</h2><div class="chart-container"><canvas id="performanceChart"></canvas></div></div></div></div></div></div><div id="clearAllModal" class="modal"><div class="modal-content"><h2>Confirm Clear All</h2><p>Are you sure you want to clear everything? This action cannot be undone.</p><button id="confirmClear">Confirm</button> <button id="cancelClear">Cancel</button></div></div><div id="editModal" class="modal"><div class="modal-content"><h2>Edit Button</h2><div class="input-container"><input id="buttonTitle" placeholder="Button Title" maxlength="10"> <span id="charCount">0/10</span></div><textarea id="buttonContent" placeholder="Prefill Content"></textarea> <select id="buttonColor"><option value="var(--red-bg)">Red</option><option value="var(--green-bg)">Green</option><option value="var(--warning-bg)">Orange</option><option value="var(--secondary)">Gray</option><option value="black">Black</option></select> <select id="targetArea"><option value="xAnalysis">Findings</option><option value="xD">Decision</option><option value="xOutput">Output</option></select> <button id="saveButton">Save</button> <button id="closeModal">Close</button></div></div><link href="main.css" rel="stylesheet"></head><body><div class="container"><div class="main"><div class="paralyser"><div class="input-overlay"><textarea id="xInput" placeholder="Paste CCS and CA content here"></textarea></div><div class="box"><div class="content-wrapper"><button id="ClearAll">Clear All</button><div id="xResult" class="result-grid"></div></div></div><div class="box"><div class="content result-wrapper"><div id="selectAllContainer" style="display: none;"><button id="selectAll">Select All</button><div id="selectAllActions" style="display: none;"><button id="selectNotNeeded">Not Needed</button> <button id="selectMoreInfo">More Info</button> <button id="selectGreenFlags" style="display: none;">Green</button> <button id="selectBack">Back</button></div></div><textarea id="xAnalysis"></textarea></div></div></div><div class="box" id="Decisionings"><textarea id="xD" placeholder="Enter your decision and conclusion here..."></textarea><div class="title-bar"><span class="title"></span><div id="bigsteppers" class="button-container"><button class="button" data-action="MI" style="background-color: var(--warning-bg); color:var(--warning-text);">More Info<span class="step-indicator" style="background-color: #ba9ce0;">Step 3</span></button> <button class="button" data-action="CI" style="background-color: var(--red-bg); color: var(--red-text);">Claim Invalid<span class="step-indicator" style="background-color: #ba9ce0;">Step 3</span></button> <button class="button" data-action="CV" style="background-color: var(--green-bg); color:var(--green-text);">Claim Valid<span class="step-indicator" style="background-color: #ba9ce0;">Step 3</span></button> <button id="resetButton" style="display: none;">↻</button> <button class="button" data-action="RE" style="background-color: var(--warning-bg); color:var(--warning-text);">Rework <span class="step-indicator" style="background-color: #4a9be6;">Step 4</span></button> <button class="button" data-action="AP" style="background-color: var(--green-bg); color:var(--green-text);">Approve <span class="step-indicator" style="background-color: #4a9be6;">Step 4</span></button> <button class="button" data-action="CC" style="background-color: var(--red-bg); color: var(--red-text);">Close <span class="step-indicator" style="background-color: #69e6d5;">Step 5</span></button> <button class="button" data-action="FI" style="background-color: var(--green-bg); color:var(--green-text);">To be Finalized <span class="step-indicator" style="background-color: #69e6d5;">Step 5</span></button></div></div></div><shrt-buttons class="box"><sbbox><sb1r><button class="shortcut-btn" data-shortcut="Alt+1">Alt+1</button> <button class="shortcut-btn" data-shortcut="Alt+2">Alt+2</button> <button class="shortcut-btn" data-shortcut="Alt+3">Alt+3</button> <button class="shortcut-btn" data-shortcut="Alt+4">Alt+4</button></sb1r><sb2r><button class="shortcut-btn" data-shortcut="Alt+Q">Alt+Q</button> <button class="shortcut-btn" data-shortcut="Alt+W">Alt+W</button> <button class="shortcut-btn" data-shortcut="Alt+E">Alt+E</button> <button class="shortcut-btn" data-shortcut="Alt+R">Alt+R</button></sb2r></sbbox><button id="gear">⚙️</button></shrt-buttons></div><div class="middle"><div class="box" id="timerrs"><button id="timer">00:00</button></div><div id="xOutput" contenteditable="true"><h1 contenteditable="false">IM Working on CCS Approvals</h1><br><h2 contenteditable="false">Step 1: Assessment</h2><div id="step1Content"></div><br><h2 contenteditable="false">Step 2: Findings</h2><div id="step2Content"></div><br><h2 contenteditable="false">Step 3: Decision</h2><div id="step3Content"></div><br><h2 contenteditable="false">Step 4: Claim Resolution Action</h2><div id="step4Content"></div><br><h2 contenteditable="false">Step 5: Next steps (If applicable)</h2><div id="step5Content"></div></div><lower-output class="box"><button id="copyButton" class="copy-btn" title="Copy (Alt+C)"><span class="copy-text">Copy</span> <span class="shortcut-hint">Alt+C</span></button> <button id="logClaimButton" class="log-claim-btn" title="Log Claim (Alt+S)"><span class="button-text">Done</span> <span class="shortcut-hint">Alt+S</span></button></lower-output></div><div class="utilities"><div class="box" id="recentGrid"><button id="ShowClaims">Show All Claims</button><div id="recent-claims" class="recent-claims-container"><div class="claims-list"></div></div><div class="box" id="hourlyClaimDashB"><div class="chart-container"><canvas id="claimChart"></canvas></div><div class="info-grid" id="chartInfo"></div></div></div><div class="box" id="notings"><div class="content-container"><div id="notepad-view"><div class="notepad-controls"><button class="format-btn" data-format="bold"><b>B</b></button> <button class="format-btn" data-format="italic"><i>I</i></button> <button class="format-btn" data-format="underline"><u>U</u></button></div><div id="notepad" contenteditable="true"></div></div><div id="calculator-view" style="display: none;"><div id="calc-display">0</div><div class="calc-buttons"><button class="calc-btn" data-action="clear">C</button> <button class="calc-btn" data-action="delete">DEL</button> <button class="calc-btn" data-action="operator" data-operator="/">÷</button> <button class="calc-btn" data-action="operator" data-operator="*">x</button> <button class="calc-btn" data-action="digit" data-digit="7">7</button> <button class="calc-btn" data-action="digit" data-digit="8">8</button> <button class="calc-btn" data-action="digit" data-digit="9">9</button> <button class="calc-btn" data-action="operator" data-operator="-">-</button> <button class="calc-btn" data-action="digit" data-digit="4">4</button> <button class="calc-btn" data-action="digit" data-digit="5">5</button> <button class="calc-btn" data-action="digit" data-digit="6">6</button> <button class="calc-btn" data-action="operator" data-operator="+">+</button> <button class="calc-btn" data-action="digit" data-digit="1">1</button> <button class="calc-btn" data-action="digit" data-digit="2">2</button> <button class="calc-btn" data-action="digit" data-digit="3">3</button> <button class="calc-btn" data-action="equals">=</button> <button class="calc-btn" data-action="digit" data-digit="0">0</button> <button class="calc-btn" data-action="decimal">.</button></div></div></div><div class="tab-container"><button class="tab-button active" data-tab="notepad">📝</button> <button class="tab-button" data-tab="calculator">🔢</button></div></div><div class="box"><div id="timerSegments"><button id="timer.break" data-duration="900">Break (Not working yet)</button> <button id="timer.lunch" data-duration="3600">Lunch (Not working yet)</button></div></div></div></div><script>// Timer functionality
+const timerElement = document.getElementById('timer');
+const logClaimButton = document.getElementById('log-claim');
+const xInput = document.getElementById('xInput');
+const clickToPasteOverlay = document.getElementById('clickToPasteOverlay');
+
+let timerInterval, seconds = 0;
+const maxSeconds = 7 * 60; // 7 minutes
+let isPaused = false;
+let targetSeconds; 
+let timerType;
+
+function startTimer() {
+    if (!timerInterval) {
+        timerInterval = setInterval(updateTimer, 1000);
+        timerElement.classList.add('active');
+        timerElement.classList.remove('paused');
+        isPaused = false;
+    }
+}
+
+function pauseTimer() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    timerElement.classList.remove('active');
+    timerElement.classList.add('paused');
+    isPaused = true;
+}
+
+function stopTimer() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    seconds = 0;
+    timerElement.textContent = '00:00';
+    timerElement.style.background = 'none';
+    timerElement.style.color = 'var(--text)';
+    timerElement.classList.remove('active', 'paused');
+    isPaused = false;
+}
+
+function updateTimer() {
+    if (!isPaused) {
+        seconds++;
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        timerElement.textContent = `${padZero(minutes)}:${padZero(remainingSeconds)}`;
+
+        const progress = (seconds / maxSeconds) * 100;
+
+        let gradientColor = '#90EE90'; // Light Green (initial color)
+        if (progress > 60) {
+            gradientColor = '#FFFF00'; // Yellow (from 60% to 100%)
+        }
+        if (seconds >= maxSeconds) {
+            gradientColor = '#FF0000'; // Red (at 100%)
+        }
+
+        timerElement.style.background = `linear-gradient(to right, ${gradientColor}, ${gradientColor} ${progress}%, var(--secondary) ${progress}%)`;
+        timerElement.style.boxShadow = `0 0 10px ${gradientColor}`;
+        timerElement.style.borderColor = gradientColor;
+
+        // Pulse animation every 5 seconds
+        if (seconds % 60 === 0) {
+            timerElement.classList.add('pulse');
+            setTimeout(() => {
+                timerElement.classList.remove('pulse');
+            }, 1000);
+        }
+    }
+}
+
+function padZero(num) {
+    return num.toString().padStart(2, '0');
+}
+
+// Event Listeners
+
+xInput.addEventListener('input', () => {
+    if (xInput.value.trim() !== '') {
+        startTimer();
+    }
+});
+
+timerElement.addEventListener('click', () => {
+    if (timerInterval) {
+        pauseTimer();
+    } else if (isPaused) {
+        startTimer();
+    } else {
+        startTimer();
+    }
+});
+
+// Add this to your existing CSS
+const style = document.createElement('style');
+style.textContent = `
+    #timer {
+        transition: background 0.3s, box-shadow 0.3s, color 0.3s;
+    }
+    #timer.active {
+        color: var(--bg);
+    }
+    #timer.paused {
+        opacity: 0.7;
+    }
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    #timer.pulse {
+        animation: pulse 0.5s ease-in-out;
+    }
+`;
+document.head.appendChild(style);
+
+
+//THIS IS FOR THE NOTEPAD/CAL
+document.addEventListener('DOMContentLoaded', () => {
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const notepadView = document.getElementById('notepad-view');
+    const calculatorView = document.getElementById('calculator-view');
+    const formatButtons = document.querySelectorAll('.format-btn');
+    const saveButton = document.getElementById('save-note');
+    const notepad = document.getElementById('notepad');
+    const calcDisplay = document.getElementById('calc-display');
+    const calcButtons = document.querySelectorAll('.calc-btn');
+
+    let currentCalc = '';
+    let lastResult = '';
+
+    // Tab switching
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const tabName = button.getAttribute('data-tab');
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+
+            if (tabName === 'notepad') {
+                notepadView.style.display = 'flex';
+                calculatorView.style.display = 'none';
+            } else {
+                notepadView.style.display = 'none';
+                calculatorView.style.display = 'flex';
+            }
+        });
+    });
+
+    // Notepad formatting
+    formatButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            document.execCommand(button.getAttribute('data-format'), false, null);
+        });
+    });
+
+    // Calculator logic
+    function updateDisplay() {
+        calcDisplay.textContent = currentCalc || '0';
+    }
+
+    function handleDigit(digit) {
+        if (lastResult !== '') {
+            currentCalc = '';
+            lastResult = '';
+        }
+        currentCalc += digit;
+        updateDisplay();
+    }
+
+    function handleOperator(operator) {
+        if (lastResult !== '') {
+            currentCalc = lastResult;
+            lastResult = '';
+        }
+        if (currentCalc === '' && operator !== '-') return;
+        if ("+-*/".includes(currentCalc.slice(-1)) && operator !== '-') {
+            currentCalc = currentCalc.slice(0, -1);
+        }
+        currentCalc += operator;
+        updateDisplay();
+    }
+
+    function handleEquals() {
+        if (currentCalc === '') return;
+        try {
+            lastResult = eval(currentCalc).toString();
+            currentCalc = lastResult;
+        } catch (error) {
+            currentCalc = 'Error';
+        }
+        updateDisplay();
+    }
+
+    function handleClear() {
+        currentCalc = '';
+        lastResult = '';
+        updateDisplay();
+    }
+
+    function handleDelete() {
+        currentCalc = currentCalc.slice(0, -1);
+        updateDisplay();
+    }
+
+    function handleDecimal() {
+        if (lastResult !== '') {
+            currentCalc = '0';
+            lastResult = '';
+        }
+        if (!currentCalc.includes('.')) {
+            currentCalc += currentCalc === '' ? '0.' : '.';
+            updateDisplay();
+        }
+    }
+
+    calcButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const action = button.getAttribute('data-action');
+            switch (action) {
+                case 'digit':
+                    handleDigit(button.getAttribute('data-digit'));
+                    break;
+                case 'operator':
+                    handleOperator(button.getAttribute('data-operator'));
+                    break;
+                case 'equals':
+                    handleEquals();
+                    break;
+                case 'clear':
+                    handleClear();
+                    break;
+                case 'delete':
+                    handleDelete();
+                    break;
+                case 'decimal':
+                    handleDecimal();
+                    break;
+            }
+        });
+    });
+
+    // Handle keyboard input for calculator
+    document.addEventListener('keydown', (event) => {
+        if (calculatorView.style.display !== 'none') {
+            const key = event.key;
+            if (/[0-9]/.test(key)) {
+                handleDigit(key);
+            } else if (['+', '-', '*', '/'].includes(key)) {
+                handleOperator(key);
+            } else if (key === 'Enter' || key === '=') {
+                handleEquals();
+                event.preventDefault(); // Prevent form submission
+            } else if (key === 'Escape') {
+                handleClear();
+            } else if (key === 'Backspace') {
+                handleDelete();
+            } else if (key === '.') {
+                handleDecimal();
+            }
+        }
+    });
+});
+
+// Notepad functionality with localStorage
+document.addEventListener('DOMContentLoaded', () => {
+    const notepad = document.getElementById("notepad");
+    const placeholderText = "You can have your personal notes here (notes will be saved unless you clear cache)...";
+
+    // Load saved content from localStorage
+    function loadSavedContent() {
+        const savedContent = localStorage.getItem('notepadContent');
+        if (savedContent) {
+            notepad.innerHTML = savedContent;
+            notepad.classList.remove("placeholder");
+        } else {
+            setPlaceholder();
+        }
+    }
+
+    // Save content to localStorage
+    function saveContent() {
+        if (notepad.textContent !== placeholderText) {
+            localStorage.setItem('notepadContent', notepad.innerHTML);
+        }
+    }
+
+    // Set the placeholder when the div is empty and not focused
+    function setPlaceholder() {
+        if (notepad.textContent === "") {
+            notepad.textContent = placeholderText;
+            notepad.classList.add("placeholder");
+        }
+    }
+
+    // Remove the placeholder when the div is focused or has content
+    function removePlaceholder() {
+        if (notepad.textContent === placeholderText) {
+            notepad.textContent = "";
+        }
+        notepad.classList.remove("placeholder");
+    }
+
+    // Event listeners
+    notepad.addEventListener("focus", removePlaceholder);
+    notepad.addEventListener("blur", () => {
+        setPlaceholder();
+        saveContent();
+    });
+    notepad.addEventListener("input", () => {
+        if (notepad.textContent !== "") {
+            notepad.classList.remove("placeholder");
+        }
+        saveContent();
+    });
+
+    // Load saved content when the page loads
+    loadSavedContent();
+
+    // Save content periodically (every 5 seconds)
+    setInterval(saveContent, 5000);
+});
+//END OF NOTEPADCAL
+
+
+// SHORTCUTBUTTONS
+
+class ShortcutButtonManager {
+    constructor() {
+        this.buttons = document.querySelectorAll('.shortcut-btn');
+        this.gearButton = document.getElementById('gear');
+        this.modal = document.getElementById('editModal');
+        this.saveButton = document.getElementById('saveButton');
+        this.closeButton = document.getElementById('closeModal');
+        this.currentButton = null;
+        this.charCount = document.getElementById('charCount');
+        this.buttonTitle = document.getElementById('buttonTitle');
+
+        this.setupEventListeners();
+        this.loadButtonConfigurations();
+    }
+
+    setupEventListeners() {
+        this.buttons.forEach(button => {
+            button.addEventListener('click', () => this.handleButtonClick(button));
+        });
+
+        this.gearButton.addEventListener('click', () => this.toggleEditMode());
+        this.saveButton.addEventListener('click', () => this.saveButtonSettings());
+        this.closeButton.addEventListener('click', () => this.closeModal());
+
+        document.addEventListener('keydown', (e) => this.handleKeyboardShortcut(e));
+
+        this.buttonTitle.addEventListener('input', () => this.updateCharCount());
+    }
+
+    updateCharCount() {
+        const currentLength = this.buttonTitle.value.length;
+        this.charCount.textContent = `${currentLength}/10`;
+    }
+
+    handleButtonClick(button) {
+        if (this.isEditMode) {
+            this.openModal(button);
+        } else {
+            this.triggerButtonAction(button);
+        }
+    }
+
+    toggleEditMode() {
+        this.isEditMode = !this.isEditMode;
+        this.gearButton.textContent = this.isEditMode ? '✅' : '⚙️';
+    }
+
+    openModal(button) {
+        this.currentButton = button;
+        this.buttonTitle.value = button.textContent.trim().slice(0, 10);
+        document.getElementById('buttonContent').value = button.dataset.content || '';
+        document.getElementById('buttonColor').value = button.dataset.color || 'white';
+        document.getElementById('targetArea').value = button.dataset.target || 'xAnalysis';
+        this.updateCharCount();
+        this.modal.style.display = 'block';
+    }
+
+    saveButtonSettings() {
+        const title = this.buttonTitle.value.trim().slice(0, 10);
+        const content = document.getElementById('buttonContent').value;
+        const color = document.getElementById('buttonColor').value;
+        const target = document.getElementById('targetArea').value;
+
+        this.currentButton.textContent = title + ' ';
+        this.currentButton.dataset.content = content;
+        this.currentButton.dataset.color = color;
+        this.currentButton.dataset.target = target;
+        this.currentButton.style.backgroundColor = color;
+        this.currentButton.style.color = ['black', 'white'].includes(color) ? 'black' : 'white';
+
+        this.saveButtonConfigurations();
+        this.closeModal();
+    }
+
+    closeModal() {
+        this.modal.style.display = 'none';
+    }
+
+    handleKeyboardShortcut(e) {
+        if (e.altKey) {
+            const key = e.key.toUpperCase();
+            const button = document.querySelector(`[data-shortcut="Alt+${key}"]`);
+            if (button) {
+                e.preventDefault();
+                this.triggerButtonAction(button);
+            }
+        }
+    }
+
+    triggerButtonAction(button) {
+        const content = button.dataset.content;
+        const target = button.dataset.target;
+        if (content && target) {
+            const targetElement = document.getElementById(target);
+            if (targetElement) {
+                if (target === 'xOutput') {
+                    targetElement.innerHTML += content;
+                } else {
+                    targetElement.value += content;
+                }
+            }
+        }
+    }
+
+    saveButtonConfigurations() {
+        const configurations = {};
+        this.buttons.forEach(button => {
+            configurations[button.dataset.shortcut] = {
+                title: button.textContent.trim(),
+                content: button.dataset.content,
+                color: button.dataset.color,
+                target: button.dataset.target
+            };
+        });
+        localStorage.setItem('shortcutButtonConfigurations', JSON.stringify(configurations));
+    }
+
+    loadButtonConfigurations() {
+    const savedConfigurations = localStorage.getItem('shortcutButtonConfigurations');
+    if (savedConfigurations) {
+        const configurations = JSON.parse(savedConfigurations);
+        this.buttons.forEach(button => {
+            const config = configurations[button.dataset.shortcut];
+            if (config) {
+                button.textContent = config.title + ' ';
+                button.dataset.content = config.content;
+                button.dataset.color = config.color;
+                button.dataset.target = config.target;
+                button.style.backgroundColor = config.color;
+                
+                // Determine text color based on background color
+                switch(config.color) {
+                    case 'var(--red-bg)':
+                    button.style.color = 'var(--red-text)';
+                        break;
+                    case 'var(--green-bg)':
+                    button.style.color = 'var(--green-text)';
+                        break;
+                    case 'var(--warning-bg)':
+                    button.style.color = 'var(--warning-text)';
+                        break;
+                    case 'var(--secondary)':
+                    button.style.color = 'var(--text)';
+                        break;
+                        case 'Black':
+                    button.style.color = 'var(--text)';
+                        break;
+                        case 'Gray':
+                    button.style.color = 'var(--text)';
+                        break;
+                    default:
+                    button.style.color = 'var(--text)';
+                        break;
+                }
+            }
+        });
+    }
+}
+}
+
+// Initialize the ShortcutButtonManager when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new ShortcutButtonManager();
+});
+
+// END OF SHORTCUTBUTTONS
+//CLEAR ALL
+class ClearAllManager {
+    constructor() {
+        this.clearAllButton = document.getElementById('ClearAll');
+        this.clearAllModal = document.getElementById('clearAllModal');
+        this.confirmClearButton = document.getElementById('confirmClear');
+        this.cancelClearButton = document.getElementById('cancelClear');
+
+        this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+        this.clearAllButton.addEventListener('click', () => this.showClearAllModal());
+        this.confirmClearButton.addEventListener('click', () => this.clearAllAndReload());
+        this.cancelClearButton.addEventListener('click', () => this.hideClearAllModal());
+    }
+
+    showClearAllModal() {
+        this.clearAllModal.style.display = 'block';
+    }
+
+    hideClearAllModal() {
+        this.clearAllModal.style.display = 'none';
+    }
+
+    clearAllAndReload() {
+        // Clear all form inputs
+        document.querySelectorAll('input, textarea').forEach(el => {
+            el.value = '';
+        });
+
+        // Clear all contenteditable elements
+        document.querySelectorAll('[contenteditable]').forEach(el => {
+            el.innerHTML = '';
+        });
+
+        // Reset any custom state in your application
+        // For example, if you have any global state variables, reset them here
+
+        // Reload the page
+        window.location.reload();
+    }
+}
+
+// Initialize the ClearAllManager when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new ClearAllManager();
+});
+//CLEAR ALL
+
+//COPY
+class CopyManager {
+    constructor() {
+        this.hasClipboardPermission = localStorage.getItem('clipboardPermission') === 'granted';
+    }
+
+    async handleCopyClick(event) {
+        const button = event.currentTarget;
+        const content = document.getElementById('xOutput').innerHTML;
+
+        if (this.hasClipboardPermission) {
+            await this.copyToClipboard(content, button);
+        } else {
+            try {
+                await navigator.clipboard.writeText(content);
+                this.hasClipboardPermission = true;
+                localStorage.setItem('clipboardPermission', 'granted');
+                this.updateButtonState(button, true);
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+                this.updateButtonState(button, false);
+            }
+        }
+    }
+
+    async copyToClipboard(content, button) {
+        try {
+            await navigator.clipboard.writeText(content);
+            this.updateButtonState(button, true);
+        } catch (err) {
+            console.error('Failed to copy: ', err);
+            this.updateButtonState(button, false);
+        }
+    }
+
+    updateButtonState(button, success) {
+        const originalText = button.textContent;
+        button.textContent = success ? 'Copied!' : 'Failed to copy';
+        button.classList.toggle('copied', success);
+
+        setTimeout(() => {
+            button.textContent = originalText;
+            button.classList.remove('copied');
+        }, 2000);
+    }
+}
+
+// Initialize the CopyManager when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new CopyManager();
+});
+//COPY
+//bigsteps
+class BigSteppersManager {
+    constructor() {
+        this.elements = {
+            bigsteppers: document.getElementById('bigsteppers'),
+            xD: document.getElementById('xD'),
+            resetButton: document.getElementById('resetButton')
+        };
+        this.currentStep = 3;
+        this.prewrittenTexts = {
+            CV: `Step 3: Decision\nClaim is Valid\nPreliminary Investigation Complete:
+No grounds found to deny the claim. Evidence supports customer's assertion. Proceeding with standard claim processing.\n`,
+            CI: `Step 3: Decision\nClaim is Invalid\nInvestigation Conclusion:
+Significant inconsistencies found contradicting customer's assertion. Claim determined invalid. No Provisional Credit (PC) due.\n`,
+            MI: `Step 3: Decision\nAdditional Information Required
+Findings inconclusive due to insufficient data. Cannot determine claim validity. More documentation needed.
+
+Step 4: Claim Resolution Action
+Rework financials to Pend
+
+Step 5: Next steps
+Keep claim pending
+Sending more info needed letter`,
+            CC: "Step 5: Next steps\nClosing Claim",
+            FI: "Step 5: Next steps (If applicable)\nClaim will be Finalized on or before FRD.",
+            RE: "Step 4: Claim Resolution Action\nRework financials\n",
+            AP: "Step 4: Claim Resolution Action\nApproving financial action requested\n"
+        };
+
+        this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+        this.elements.bigsteppers.addEventListener('click', this.handleBigStepperClick.bind(this));
+        this.elements.resetButton.addEventListener('click', this.resetToStep3.bind(this));
+        this.showButtonsForStep(3);
+    }
+
+    handleBigStepperClick(event) {
+        const clickedButton = event.target.closest('.button');
+        if (!clickedButton) return;
+
+        const action = clickedButton.getAttribute('data-action');
+        this.insertText(action);
+
+        if (action !== 'MI') {
+            this.currentStep++;
+            if (this.currentStep <= 5) {
+                this.showButtonsForStep(this.currentStep);
+            }
+        }
+    }
+
+    showButtonsForStep(step) {
+        const buttons = this.elements.bigsteppers.querySelectorAll('.button');
+        buttons.forEach(button => {
+            const stepIndicator = button.querySelector('.step-indicator');
+            if (stepIndicator && stepIndicator.textContent.includes(`Step ${step}`)) {
+                button.style.display = 'inline-block';
+            } else {
+                button.style.display = 'none';
+            }
+        });
+
+        this.elements.resetButton.style.display = (step === 4 || step === 5) ? 'inline-block' : 'none';
+    }
+
+    insertText(type) {
+        const text = this.prewrittenTexts[type];
+        if (!text) return;
+
+        if (['CC', 'FI', 'RE', 'AP'].includes(type)) {
+            this.replaceOrAddStep(this.elements.xD, ['CC', 'FI'].includes(type) ? 5 : 4, text);
+        } else {
+            this.elements.xD.value = text;
+        }
+
+        // Trigger an input event to ensure any listeners are notified of the change
+        const inputEvent = new Event('input', { bubbles: true, cancelable: true });
+        this.elements.xD.dispatchEvent(inputEvent);
+    }
+
+    replaceOrAddStep(element, stepNumber, newText) {
+        const lines = element.value.split('\n');
+        const stepFound = lines.some((line, index) => {
+            if (line.startsWith(`Step ${stepNumber}:`)) {
+                lines.splice(index, 2, newText);
+                return true;
+            }
+            return false;
+        });
+
+        if (!stepFound) {
+            lines.push(newText);
+        }
+
+        element.value = lines.join('\n');
+    }
+
+    resetToStep3() {
+        this.currentStep = 3;
+        this.showButtonsForStep(3);
+        this.elements.xD.value = '';
+        
+        // Trigger an input event to ensure any listeners are notified of the change
+        const inputEvent = new Event('input', { bubbles: true, cancelable: true });
+        this.elements.xD.dispatchEvent(inputEvent);
+    }
+}
+
+// Initialize the BigSteppersManager when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+    window.bigSteppersManager = new BigSteppersManager();
+});
+//bigggue
+
+//COPY UPGRADE
+//THE SHOWALL MODAL
+class ClaimArchiveManager {
+    constructor() {
+        this.showArchiveButton = document.getElementById('ShowClaims');
+        this.archiveOverlay = document.getElementById('claimArchiveOverlay');
+        this.closeButton = this.archiveOverlay.querySelector('.claim-archive-close');
+        this.claimsList = document.getElementById('claimsList');
+        this.exportButton = document.getElementById('export-csv');
+        this.recentClaimsList = document.querySelector('#recentGrid .claims-list');
+        this.chartAvailable = typeof Chart !== 'undefined';
+        this.charts = {};
+
+        this.setupEventListeners();
+        this.updateRecentClaims(); // Call this in the constructor to populate recent claims on page load
+        this.addClaimArchiveStyles();
+        this.addClaimNotesStyles(); // Add this line to call the method
+    }
+
+    setupEventListeners() {
+        this.showArchiveButton.addEventListener('click', () => this.showClaimArchive());
+        this.closeButton.addEventListener('click', () => this.closeArchive());
+        this.exportButton.addEventListener('click', () => this.exportToCSV());
+        window.addEventListener('click', (event) => {
+            if (event.target === this.archiveOverlay) {
+                this.closeArchive();
+            }
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.archiveOverlay.style.display === 'flex') {
+                this.closeArchive();
+            }
+        });
+    }
+
+    updateRecentClaims() {
+        if (!this.recentClaimsList) {
+            console.error('Recent claims list element not found');
+            return;
+        }
+
+        const allLogs = JSON.parse(localStorage.getItem('allClaimLogs') || '[]');
+        
+        // Sort logs by timestamp, most recent first
+        allLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+        // Get the 5 most recent logs
+        const recentLogs = allLogs.slice(0, 10);
+
+        this.recentClaimsList.innerHTML = recentLogs.map(log => `
+            <div class="claim-item">
+                <div class="claim-details">
+                    <span class="claim-number">${log.claimNumber}</span>
+                    <span class="claim-scenario">${log.scenario}</span>
+                </div>
+                <div class="claim-meta">
+                    <span class="claim-date">${new Date(log.timestamp).toLocaleDateString()}</span>
+                    <span class="claim-duration">${log.duration}</span>
+                </div>
+            </div>
+        `).join('');
+
+        console.log('Recent claims updated:', recentLogs); // Debugging log
+    }
+
+    showClaimArchive() {
+        const allLogs = JSON.parse(localStorage.getItem('allClaimLogs') || '[]');
+        this.populateClaimsList(allLogs);
+        this.updateStatistics(allLogs);
+        this.createCharts(allLogs);
+        this.archiveOverlay.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    closeArchive() {
+        this.archiveOverlay.style.display = 'none';
+        document.body.style.overflow = '';
+        this.updateRecentClaims(); // Update recent claims when closing the archive
+    }
+
+    populateClaimsList(logs) {
+        this.claimsList.innerHTML = logs.map((log, index) => `
+            <div class="claim-item" data-index="${index}">
+                <div class="claim-header">
+                    <span>${log.claimNumber}</span>
+                    <span>${new Date(log.timestamp).toLocaleDateString()}</span>
+                </div>
+                <div class="claim-details">
+                    <span>Scenario:</span>
+                    <span>${log.scenario}</span>
+                    <span>Duration:</span>
+                    <span>${log.duration}</span>
+                    <span>Amount:</span>
+                    <span>$${log.amount || 'N/A'}</span>
+                </div>
+                <button class="view-notes-btn">Notes</button>
+            </div>
+        `).join('');
+
+        // Add event listeners to "View Notes" buttons
+        this.claimsList.querySelectorAll('.view-notes-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const index = e.target.closest('.claim-item').dataset.index;
+                this.viewClaimNotes(logs[index]);
+            });
+        });
+    }
+
+    addClaimArchiveStyles() {
+        const style = document.createElement('style');
+        style.textContent = `
+            .claim-item {
+                background-color: var(--card-bg);
+                border-radius: 8px;
+                padding: 10px;
+                margin-bottom: 10px;
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+            .claim-item:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            .claim-details {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 5px;
+            }
+            .claim-meta {
+                display: flex;
+                justify-content: space-between;
+                font-size: 0.9em;
+                color: var(--text-muted);
+            }
+            .claim-number {
+                font-weight: bold;
+                color: var(--accent-color);
+            }
+            .claim-scenario {
+                font-style: italic;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    viewClaimNotes(claim) {
+    // Create a modal to display the claim notes
+    const modal = document.createElement('div');
+    modal.className = 'claim-notes-modal';
+
+    // Determine the content to display
+    let content = 'No notes available for this claim.';
+    if (claim.content) {
+        content = claim.content;
+    } else if (claim.xOutput) {
+        content = claim.xOutput;
+    } else if (typeof claim === 'string') {
+        content = claim;
+    }
+
+    modal.innerHTML = `
+        <button class="close-notes-btn">Close</button>
+        <div class="claim-notes-content">             
+            <h3>Notes for Claim ${claim.claimNumber || 'Unknown'}</h3>
+            
+            <pre>${content}</pre>
+        </div>
+    `;
+
+    // Add the modal to the document
+    document.body.appendChild(modal);
+
+    // Add event listener to close button
+    modal.querySelector('.close-notes-btn').addEventListener('click', () => {
+        document.body.removeChild(modal);
+    });
+
+    // Close modal when clicking outside the content
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            document.body.removeChild(modal);
+        }
+    });
+}
+
+    addClaimNotesStyles() {
+        const style = document.createElement('style');
+        style.textContent = `
+            .claim-notes-modal {
+                position: fixed;
+                z-index: 1001;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.7);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                backdrop-filter: blur(50px);
+            }
+            .claim-notes-content {
+                background-color: var(--card-bg);
+                padding: 20px;
+                border-radius: 8px;
+                max-width: 30%;
+                max-height: 80%;
+                position:absolute;
+                overflow-y: auto;
+            }
+            .claim-notes-content h3 {
+                color: var(--accent-light);
+                margin-bottom: 10px;
+            }
+            .claim-notes-content pre {
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                color: var(--text-color);
+            }
+            .close-notes-btn {
+                margin-top: 15px;
+                padding: 5px 10px;
+                background-color: var(--accent-color);
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                    z-index: 1;
+            }
+            .view-notes-btn {
+                margin-top: 10px;
+                padding: 5px 10px;
+                background-color: var(--accent-color);
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    updateStatistics(logs) {
+        document.getElementById('total-claims').textContent = logs.length;
+        const avgHandlingTime = logs.reduce((sum, log) => sum + this.durationToMinutes(log.duration), 0) / logs.length;
+        document.getElementById('avg-handling-time').textContent = `${avgHandlingTime.toFixed(0)} min`;
+        document.getElementById('claims-per-day').textContent = (logs.length / 30).toFixed(1);
+    }
+
+    durationToMinutes(duration) {
+        const [hours, minutes] = duration.split(':').map(Number);
+        return hours * 60 + minutes;
+    }
+
+    createCharts(logs) {
+        if (this.chartAvailable) {
+            this.createScenarioChart(logs);
+            this.createHandlingTimeChart(logs);
+            this.createPerformanceChart(logs);
+        } else {
+            console.warn('Chart.js is not available. Charts will not be displayed.');
+            document.querySelectorAll('.chart-container').forEach(container => {
+                container.innerHTML = '<p>Charts are currently unavailable.</p>';
+            });
+        }
+    }
+
+    createScenarioChart(logs) {
+        if (!this.chartAvailable) return;
+
+        const scenarioCounts = logs.reduce((acc, log) => {
+            acc[log.scenario] = (acc[log.scenario] || 0) + 1;
+            return acc;
+        }, {});
+
+        const ctx = document.getElementById('scenarioChart').getContext('2d');
+        
+        // Destroy existing chart if it exists
+        if (this.charts.scenario) {
+            this.charts.scenario.destroy();
+        }
+
+        this.charts.scenario = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(scenarioCounts),
+                datasets: [{
+                    data: Object.values(scenarioCounts),
+                    backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#e2e8f0' }
+                    },
+                    datalabels: {
+                        color: '#ffffff',
+                        formatter: (value, ctx) => {
+                            const sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                            return (value * 100 / sum).toFixed(1) + "%";
+                        },
+                    }
+                }
+            }
+        });
+    }
+
+    createHandlingTimeChart(logs) {
+    if (!this.chartAvailable) return;
+    
+    const ctx = document.getElementById('handlingTimeChart').getContext('2d');
+    
+    // Destroy existing chart if it exists
+    if (this.charts.handlingTime) {
+        this.charts.handlingTime.destroy();
+    }
+
+    // Process data
+    const scenarioTimes = logs.reduce((acc, log) => {
+        if (!acc[log.scenario]) {
+            acc[log.scenario] = [];
+        }
+        acc[log.scenario].push(this.durationToMinutes(log.duration));
+        return acc;
+    }, {});
+
+    const labels = Object.keys(scenarioTimes);
+    const data = labels.map(scenario => {
+        const times = scenarioTimes[scenario];
+        return times.reduce((sum, time) => sum + time, 0) / times.length;
+    });
+
+    // Create new chart
+    this.charts.handlingTime = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Average Handling Time (minutes)',
+                data: data,
+                backgroundColor: '#3b82f6'
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Time (minutes)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.parsed.y.toFixed(2)} minutes`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+createPerformanceChart(logs) {
+    if (!this.chartAvailable) return;
+    
+    const ctx = document.getElementById('performanceChart').getContext('2d');
+    
+    // Destroy existing chart if it exists
+    if (this.charts.performance) {
+        this.charts.performance.destroy();
+    }
+
+    // Process data
+    const dailyCounts = logs.reduce((acc, log) => {
+        const date = new Date(log.timestamp).toLocaleDateString();
+        acc[date] = (acc[date] || 0) + 1;
+        return acc;
+    }, {});
+
+    const labels = Object.keys(dailyCounts).sort((a, b) => new Date(a) - new Date(b));
+    const data = labels.map(date => dailyCounts[date]);
+
+    // Create new chart
+    this.charts.performance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Claims Handled',
+                data: data,
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Claims'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Date'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+}
+
+exportToCSV() {
+    const allLogs = JSON.parse(localStorage.getItem('allClaimLogs') || '[]');
+    
+    if (allLogs.length === 0) {
+        alert('No data to export.');
+        return;
+    }
+
+    console.log('All logs:', allLogs); // Debugging: Log all claim data
+
+    // Function to escape special characters in CSV
+    const escapeCSV = (text) => {
+        if (text == null) return '';
+        text = text.toString();
+        if (text.includes('"') || text.includes(',') || text.includes('\n') || text.includes('\r')) {
+            text = '"' + text.replace(/"/g, '""') + '"';
+        }
+        return text;
+    };
+
+    // Create CSV content
+    const headers = ['Claim Number', 'Scenario', 'Date', 'Duration', 'Amount', 'Notes'];
+    let csvContent = headers.map(escapeCSV).join(',') + '\r\n';
+
+    allLogs.forEach(log => {
+        console.log('Processing log:', log); // Debugging: Log each claim being processed
+
+        let notes = 'N/A';
+        if (log.content) {
+            notes = log.content.replace(/(<([^>]+)>)/gi, "").trim();
+            console.log('Notes content:', notes); // Debugging: Log the processed notes content
+        } else if (log.xOutput) {
+            notes = log.xOutput.replace(/(<([^>]+)>)/gi, "").trim();
+            console.log('xOutput content:', notes); // Debugging: Log the processed xOutput content
+        }
+
+        const row = [
+            log.claimNumber,
+            log.scenario,
+            new Date(log.timestamp).toLocaleString(),
+            log.duration,
+            log.amount || 'N/A',
+            notes
+        ];
+        csvContent += row.map(escapeCSV).join(',') + '\r\n';
+    });
+
+    console.log('CSV Content:', csvContent); // Debugging: Log the final CSV content
+
+    // Create and trigger download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `claim_data_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+}
+}
+
+// Initialize the ClaimArchiveManager when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new ClaimArchiveManager();
+});
+
+
+// intro
+document.addEventListener('DOMContentLoaded', () => {
+    const i = document.getElementById('intro-container'),
+        t = document.getElementById('intro-text'),
+        d = 3200;
+
+    t.innerHTML = t.textContent.replace(/\S/g, "<span class='char'>$&</span>");
+    document.querySelectorAll('.char').forEach((c, j) => c.style.animationDelay = `${j * 100 + 500}ms`);
+
+    const e = (f = false) => {
+        if (f) document.querySelectorAll('.char,.signature').forEach(e => {
+            e.style.animationDelay = '0s';
+            e.style.animationDuration = '0.05s';
+        });
+
+        // Calculate 80% of the intro duration
+        const introEightyPercent = 0.7 * d;
+
+        // Start the container animation at 80% of the intro duration
+        setTimeout(() => {
+            var container = document.querySelector('.container');
+            container.style.opacity = 1;
+            container.style.transform = "scale(1)";
+        }, introEightyPercent);
+
+        // Fade out the intro after the full duration
+        setTimeout(() => {
+            i.style.opacity = '0';
+            setTimeout(() => {
+                i.style.display = 'none';
+                t.classList.add('shine');
+            }, 1000);
+        }, f ? 100 : d);
+    };
+
+    // Check if intro has been shown before
+    const hasSeenIntro = localStorage.getItem('hasSeenIntro');
+
+    if (!hasSeenIntro) {
+        document.addEventListener('keydown', () => e(true));
+        setTimeout(() => e(), d);
+
+        // Mark intro as seen
+        localStorage.setItem('hasSeenIntro', 'true');
+    } else {
+        // Skip intro if already seen
+        i.style.display = 'none';
+        var container = document.querySelector('.container');
+        container.style.opacity = 1;
+        container.style.transform = "scale(1)";
+    }
+});
+// intro</script><button id="colorSchemeToggle" style="position: fixed; top: 20px; right: 20px;">☀️</button><script defer="defer" src="bundle.js"></script><script>(()=>{"use strict";const e={"Damaged or Defective merchandise":"DFDM","Merchandise not received":"MNRC","Not as described":"NADR","Services not rendered":"SNRN",Misrepresentation:"MRPT","Cancelled recurring":"CNRX","Credit not processed":"CRNP","Deposit Adjustment":"DPAD","Deposit posting error":"DPST","Duplicate processing":"DPPR","Missing deposit":"MIDP",Overcharged:"OCHG","Paid by other means":"PBOM","Shorted funds":"SHFU","Account Take Over":"ATO","Third Party Inducement":"TPI","Counterfeit scenario":"Counterfeit","Counterfeit digital wallet":"Cnft Digital","Lost card":"Lost card","Stolen card":"Stolen card","Lost/Stolen digital wallet":"Lst/Stl Dgtl","Non Receipt of card":"Non Receipt","Unauthorized MOTO":"Unauth MOTO"},t={accountNumber:/Reference Number:\s*(\d+)/,scenario:new RegExp(`Show Additional Information.*?(${Object.keys(e).join("|")})`,"i"),status:/Status(?:\s+Code)?:\s*((?:Provisional Credit Issued - Recovery Pending|Pending|Closed|Waiting Approval of Financial Transactions|Waiting for Approval of Denial)(?:\s+\(\d+\))?)/i,claimAmount:/Claim Amount:\s*(\$[\d,]+\.\d{2})/,customerSince:/Customer Since:\s*(\d{2}\/\d{2}\/\d{4})/,dateOfBirth:/Birth Date:\s*(\d{2}\/\d{2}\/\d{4})/,openDate:/Open Date:?\s*(\d{2}\/\d{2}\/\d{4})/i,ytdAvgBal:/Average Balance YTD[:\s]*\$?([\d,]+\.?\d*)/i,nsf:/OD\/NSF Occurrences Past 12 Months[:\s]*(\d+)/i,transactionDate:/Transactions:[\s\S]*?Date[\s\S]*?(\d{2}\/\d{2}\/\d{4})/};class n{constructor(){this.analysisQuestions={DFDM:[{question:"Defect description?",notRequired:!1},{question:"Item purchased?",notRequired:!1},{question:"Estimated delivery date?",notRequired:!1},{question:"Return details?",notRequired:!1},{question:">16 days since return?",notRequired:!1}],MNRC:[{question:"Item purchased?",notRequired:!1},{question:"Estimated delivery date?",notRequired:!1},{question:"Received late & attempted return?",notRequired:!1},{question:"Cancellation date?",notRequired:!1},{question:"Cancellation reason?",notRequired:!1}],NADR:[{question:"Item & reason for NADR?",notRequired:!1},{question:"Expected service/delivery date?",notRequired:!1},{question:"Attempted resolution with merchant?",notRequired:!1},{question:"Cancellation/Return date?",notRequired:!1},{question:">16 days since return?",notRequired:!1}],SNRN:[{question:"Service purchased?",notRequired:!1},{question:"Expected service date?",notRequired:!1},{question:"Attempted resolution with merchant?",notRequired:!1},{question:"Cancellation date?",notRequired:!1},{question:"Cancellation reason?",notRequired:!1}],MRPT:[{question:"Purchase details?",notRequired:!1},{question:"Date merchant contacted?",notRequired:!1},{question:"Misrepresentation details?",notRequired:!1},{question:"Date received?",notRequired:!1},{question:"Date canceled/returned?",notRequired:!1},{question:"Agreed to future transactions?",notRequired:!1},{question:"7-day billing notification received?",notRequired:!1}],CNRX:[{question:"Cancellation date?",notRequired:!1},{question:"Cancellation reason?",notRequired:!1},{question:"Merchant contact details?",notRequired:!1}],CRNP:[{question:"Cancellation date?",notRequired:!1},{question:"Purchase description?",notRequired:!1},{question:"Expected/received date?",notRequired:!1},{question:"Return date?",notRequired:!1},{question:"Invoice/tracking number?",notRequired:!1},{question:"Attempted resolution with merchant?",notRequired:!1},{question:">16 days since return/cancellation?",notRequired:!1}],DPAD:[{question:" ",notRequired:!1}],DPST:[{question:"Legal line vs deposit amount mismatch?",notRequired:!1},{question:"EIV maker item match?",notRequired:!1},{question:"Deposit Review error confirmed?",notRequired:!1},{question:"TI error found?",notRequired:!1}],DPPR:[{question:"Ch can provide valid transation?",notRequired:!1},{question:"VROL supports duplicate processing?",notRequired:!1}],MIDP:[{question:"Deposit confirmed in Chase systems?",notRequired:!1},{question:"CMM check?",notRequired:!1},{question:"Valid deposit receipt provided?",notRequired:!1},{question:"TI error/sequence numbers?",notRequired:!1},{question:"Chip enabled deposit?",notRequired:!1},{question:"No irregular activity within same timeframe?",notRequired:!1}],OCHG:[{question:"Overcharge amount?",notRequired:!1},{question:"Transaction receipt w/ overcharge info?",notRequired:!1}],PBOM:[{question:"Chase-verified other payment?",notRequired:!1},{question:"Non-Chase payment proof in 10 days?",notRequired:!1},{question:"$500+ claim: signed statement in 10 days?",notRequired:!1}],SHFU:[{question:"TI error message?",notRequired:!1},{question:"Machine imbalance/funds not received?",notRequired:!1}],ATO:[{questionGreen:"Customer disputing all transactions performed on card that wasn't received (Excludes 522 or MOTO 2 transactions)",questionRed:"Customer not disputing all transactions performed on card that wasn't received (Excludes 522 or MOTO 2 transactions)",notRequired:!1},{questionGreen:"Invalid PIN attempts (i.e. N/A if PIN mailer sent)",questionRed:"No invalid PIN attempts (i.e. N/A if PIN mailer sent)",notRequired:!1},{questionGreen:"Out of pattern transactions: No history of valid transactions at same merchant location / terminal as disputed transactions or disputed transactions not similar in frequency and dollar amounts of customers previous valid transactions at same merchant location / terminal",questionRed:"Two or more undisputed transactions at same merchant location / terminal as disputed transactions for similar frequencies and dollar amounts",notRequired:!1},{questionGreen:"When disputed transaction recurring (i.e. code 522 or MOTO 2), related previous transactions also disputed",questionRed:"Transaction recurring (i.e. code 522 or MOTO 2) and previous transactions not being disputed",notRequired:!1},{questionGreen:"Recent changes to customer information (i.e. email, phone, address, etc.)",questionRed:"No recent changes to customer information (i.e. email, phone, address, etc.)",notRequired:!1},{questionGreen:"Third party fraud indicators present.",questionRed:null,notRequired:!1},{questionGreen:null,questionRed:"FPF indicators present",notRequired:!1},{questionGreen:"Transactions attempted after card closure",questionRed:null,notRequired:!1},{questionGreen:"Card mailed to alternative address",questionRed:null,notRequired:!1}],TPI:[{questionGreen:"Customer tricked into giving account info/access (e.g., ATM, debit card) \nSomeone else used the info to make transactions \nCustomer didn't approve transactions \nCustomer didn't receive benefit",questionRed:"Customer benefited from the transactions \nCustomer made the transactions themselves",notRequired:!1}],Counterfeit:[{questionGreen:"Out of pattern transactions: No history of valid transactions at the same merchant location / terminal of disputed transactions OR disputed transactions not similar in frequency and dollar amounts of customers' previous valid transactions at the same merchant location / terminal",questionRed:"Two or more undisputed transactions at the same merchant location / terminal as disputed transactions for similar frequencies and dollar amounts",notRequired:!1},{questionGreen:"TASER NG shows customer confirmed transaction fraud",questionRed:"TASER NG shows customer confirmed transaction valid",notRequired:!1},{questionGreen:"Disputed transaction recurring (i.e., code 522 or MOTO 2) and related previous transactions also disputed",questionRed:"Disputed transaction recurring (i.e., code 522 or MOTO 2) and related previous transactions not disputed",notRequired:!1},{questionGreen:"Transaction at chip-enabled ATM/merchant terminal where TI shows fallback transaction",questionRed:"Transaction at chip-enabled ATM/merchant terminal where TI does not show fallback transaction",notRequired:!1},{questionGreen:"Transaction conducted outside of the customer's geographic area or current transacting area",questionRed:"Transactions conducted within the geographical area",notRequired:!1},{questionGreen:"Chip-enabled card only: \n• Used at a chip-enabled ATM terminal (i.e., can't be a fallback transaction) \n• Used with PIN-based transactions (e.g., 543, 515 transaction codes) ",questionRed:"Chip enabled card only: \n• Abnormal deposits fund disputed transactions \n• The following can be used to support chip-enabled card Red Flag: \n• PIN used to conduct transactions \n• ZIP Code entered at the time of purchase for authentication (AVS) \n• Contactless Chip POS 07 transactions treated as card-present, EMV-enabled transactions",notRequired:!1}],"Lost card":[{questionGreen:"Out of pattern transactions: No history of valid transactions at the same merchant location / terminal of disputed transactions OR disputed transactions not similar in frequency and dollar amounts of customers' previous valid transactions at the same merchant location / terminal",questionRed:"Two or more undisputed transactions at the same merchant location / terminal as disputed transactions for similar frequencies and dollar amounts",notRequired:!1},{questionGreen:"Invalid PIN attempts (i.e., N/A if the PIN was carried with the card)",questionRed:"No invalid PIN attempts (i.e., N/A if the PIN was carried with the card)",notRequired:!1},{questionGreen:"TASER NG shows customer confirmed transaction fraud",questionRed:"TASER NG shows customer confirmed transaction valid",notRequired:!1},{questionGreen:"Customer disputing all card-present transactions performed after the first disputed transaction",questionRed:"Customer not disputing all card-present transactions performed after the first disputed transaction",notRequired:!1},{questionGreen:"Disputed transaction recurring (i.e., code 522 or MOTO 2) and related previous transactions also disputed",questionRed:"Disputed transaction recurring (i.e., code 522 or MOTO 2) and related previous transactions not disputed",notRequired:!1},{questionGreen:"Card present transactions attempted after card closure",questionRed:null,notRequired:!1},{questionGreen:null,questionRed:"Abnormal deposits fund disputed transactions",notRequired:!1},{questionGreen:"Third-party fraud indicators present",questionRed:null,notRequired:!1},{questionGreen:null,questionRed:"FPF indicators present",notRequired:!1}],"Stolen card":[{questionGreen:"Out of pattern transactions: No history of valid transactions at the same merchant location / terminal of disputed transactions OR disputed transactions not similar in frequency and dollar amounts of customers' previous valid transactions at the same merchant location / terminal",questionRed:"Two or more undisputed transactions at the same merchant location / terminal as disputed transactions for similar frequencies and dollar amounts",notRequired:!1},{questionGreen:"Invalid PIN attempts (i.e., N/A if the PIN was carried with the card)",questionRed:"No invalid PIN attempts (i.e., N/A if the PIN was carried with the card)",notRequired:!1},{questionGreen:"TASER NG shows customer confirmed transaction fraud",questionRed:"TASER NG shows customer confirmed transaction valid",notRequired:!1},{questionGreen:"Customer disputing all card-present transactions performed after the first disputed transaction",questionRed:"Customer not disputing all card-present transactions performed after the first disputed transaction",notRequired:!1},{questionGreen:"Disputed transaction recurring (i.e., code 522 or MOTO 2) and related previous transactions also disputed",questionRed:"Disputed transaction recurring (i.e., code 522 or MOTO 2) and related previous transactions not disputed",notRequired:!1},{questionGreen:"Card present transactions attempted after card closure",questionRed:null,notRequired:!1},{questionGreen:null,questionRed:"Abnormal deposits fund disputed transactions",notRequired:!1},{questionGreen:"Third-party fraud indicators present",questionRed:null,notRequired:!1},{questionGreen:null,questionRed:"FPF indicators present",notRequired:!1}],"Lst/Stl Dgtl":[{questionGreen:"New devices recently added to the online profile",questionRed:"No new devices recently added to the online profile",notRequired:!1},{questionGreen:"Password change/demographic changes before unauthorized activity",questionRed:"No password change/demographic changes before unauthorized activity",notRequired:!1},{questionGreen:"Customer didn't allow persons access to the device that houses the Digital Wallet and suspects they conducted the transaction",questionRed:"Customer allowed persons access to the device that houses the Digital Wallet",notRequired:!1},{questionGreen:"No login to chase.com from a lost/stolen device with biometric login credentials after the device was lost/stolen",questionRed:"Successful login to chase.com from a lost/stolen device with biometric login credentials after the device was lost/stolen",notRequired:!1},{questionGreen:"Customer didn't share sign-on passwords/PINs required to make purchases or conduct activity",questionRed:"Customer shared sign-on, passwords/PINs required to make purchases or conduct activity",notRequired:!1},{questionGreen:"Customer disputing all transactions done with the token ID after the first fraudulent transaction",questionRed:"Customer not disputing all non-recurring transactions done with the token ID after the first fraudulent transaction",notRequired:!1},{questionGreen:"Invalid ZIP Code attempts \nInvalid PIN attempts found",questionRed:null,notRequired:!1},{questionGreen:"Third-party fraud indicators present",questionRed:null,notRequired:!1},{questionGreen:null,questionRed:"FPF indicators present",notRequired:!1}],"Non Receipt":[{questionGreen:"Card not activated at a terminal previously used by the customer within the last six months",questionRed:null,notRequired:!1},{questionGreen:null,questionRed:"Card sent to the mailing address on file with no PIN mailer and card activated at a terminal used by the customer within the last six months",notRequired:!1},{questionGreen:"Customer disputing all transactions performed on a card not received (Excludes 522 or MOTO 2 transactions)",questionRed:"Customer not disputing all transactions performed on a card not received (i.e., can't be code 522 or MOTO 2)",notRequired:!1},{questionGreen:"Invalid PIN attempts (i.e., N/A if the PIN was carried with the card)",questionRed:"No invalid PIN attempts (i.e., N/A if the PIN was carried with the card)",notRequired:!1},{questionGreen:"Out of pattern transactions: No history of valid transactions at the same merchant location / terminal of disputed transactions OR disputed transactions not similar in frequency and dollar amounts of customers' previous valid transactions at the same merchant location / terminal",questionRed:"Two or more undisputed transactions at the same merchant location / terminal as disputed transactions for similar frequencies and dollar amounts",notRequired:!1},{questionGreen:"Disputed transaction recurring (i.e., code 522 or MOTO 2) and related previous transactions also disputed",questionRed:"Disputed transaction recurring (i.e., code 522 or MOTO 2) and related previous transactions not disputed",notRequired:!1},{questionGreen:"Transactions attempted after card closure",questionRed:null,notRequired:!1},{questionGreen:"Third-party fraud indicators present",questionRed:null,notRequired:!1},{questionGreen:null,questionRed:"FPF indicators present",notRequired:!1}],"Unauth MOTO":[{questionGreen:"Out of pattern transactions: No history of valid transactions at the same merchant location / terminal of disputed transactions OR disputed transactions not similar in frequency and dollar amounts of customers' previous valid transactions at the same merchant location / terminal",questionRed:"Two or more undisputed transactions at the same merchant location / terminal as disputed transactions for similar frequencies and dollar amounts",notRequired:!1},{questionGreen:"Disputed transaction recurring (i.e., code 522 or MOTO 2) and related previous transactions also disputed",questionRed:"Disputed transaction recurring (i.e., code 522 or MOTO 2) and related previous transactions not disputed",notRequired:!1},{questionGreen:"Subscription merchants: Initial sign-up transaction also disputed (customer didn't authorize subscription)",questionRed:"Subscription merchants: Initial sign-up transaction valid but following charges reported as fraud (i.e., shows claim Non Fraud)",notRequired:!1},{questionGreen:"Third-party fraud indicators present",questionRed:null,notRequired:!1},{questionGreen:null,questionRed:"FPF indicators present",notRequired:!1}]}}analyze(e){const t=e.scenario;return this.isFraudScenario(t),this.getQuestionsForScenario(t)}isFraudScenario(e){return["ATO","TPI","Counterfeit","Cnft Digital","Lost card","Stolen card","Lst/Stl Dgtl","Non Receipt","Unauth MOTO"].includes(e)}getQuestionsForScenario(e){return this.isFraudScenario(e)?this.analysisQuestions[e].map(((e,t)=>({green:e.questionGreen,red:e.questionRed,notRequired:!1}))):this.analysisQuestions[e]||[]}validateAnalysisAnswers(e,t){const n=this.getQuestionsForScenario(e);let s=!0,i=[];return n.forEach(((e,n)=>{t[n]||e.notRequired||(s=!1,i.push(e.question))})),{isValid:s,unansweredQuestions:i}}}class s{constructor(){this.elements={xInput:document.getElementById("xInput"),xResult:document.getElementById("xResult"),xAnalysis:document.getElementById("xAnalysis"),xInsight:document.getElementById("xInsight"),xD:document.getElementById("xD"),xOutput:document.getElementById("xOutput"),clearBtns:document.querySelectorAll(".clear-btn"),logClaimBtn:document.getElementById("log-claim-btn"),allLogsBtn:document.getElementById("all-logs-btn"),logsPopup:document.getElementById("logs-popup"),closePopupBtn:document.querySelector(".close-popup"),pasteButton:document.getElementById("pasteButton"),fillButton:document.getElementById("fillButton"),fill2Button:document.getElementById("fill2Button"),inputTitle:document.querySelector(".box .title-bar .title"),step1Content:document.getElementById("step1Content"),step2Content:document.getElementById("step2Content"),step3Content:document.getElementById("step3Content"),step4Content:document.getElementById("step4Content"),step5Content:document.getElementById("step5Content"),analysisContainer:document.querySelector(".analysis-container"),copyButton:document.getElementById("copyButton"),timerrs:document.getElementById("timerrs"),pasteIndicator:document.createElement("div")},this.state={fields:{},hasCCS:!1,hasCA:!1,isRawInputVisible:!1},this.setupShortcuts(),this.renderResultBox(),this.analyzer=new n,this.setupEventListeners(),this.elements.copyButton=document.getElementById("copyButton"),this.elements.logClaimButton=document.getElementById("logClaimButton"),this.elements.copyButton.addEventListener("click",(()=>this.handleCopy())),this.elements.logClaimButton.addEventListener("click",(()=>this.handleLogClaim())),this.analysisAnswers={},this.currentScenario=null,this.setupRealTimeUpdates(),this.elements.xInput.parentNode.insertBefore(this.elements.pasteIndicator,this.elements.xInput.nextSibling),this.elements.analysisContainer=document.createElement("div"),this.elements.analysisContainer.className="analysis-container",this.elements.xAnalysis.parentNode.insertBefore(this.elements.analysisContainer,this.elements.xAnalysis),this.elements.selectAllContainer=document.getElementById("selectAllContainer"),this.elements.selectAll=document.getElementById("selectAll"),this.elements.selectAllActions=document.getElementById("selectAllActions"),this.elements.selectNotNeeded=document.getElementById("selectNotNeeded"),this.elements.selectMoreInfo=document.getElementById("selectMoreInfo"),this.elements.selectBack=document.getElementById("selectBack"),this.elements.selectAll.addEventListener("click",(()=>this.showSelectAllOptions())),this.elements.selectNotNeeded.addEventListener("click",(()=>this.selectAllAction("notNeeded"))),this.elements.selectMoreInfo.addEventListener("click",(()=>this.selectAllAction("moreInfo"))),this.elements.selectBack.addEventListener("click",(()=>this.hideSelectAllOptions())),this.elements.xResult.addEventListener("input",this.updateOutput.bind(this)),this.elements.xAnalysis.addEventListener("input",this.updateOutput.bind(this)),this.elements.xD.addEventListener("input",this.updateOutput.bind(this)),this.elements.xResult.addEventListener("click",this.handleSpecialFieldClick.bind(this)),this.elements.analysisContainer.addEventListener("input",this.updateOutput.bind(this)),this.fieldsRequiringInteraction=["withdrew","merchantCredit","duplicateClaim","pcUsedToFundOtherClaims","unusualDepositPriorToReporting","matchingAdjustment","claimsFiledLess1yr","immediateUseOfFunds"],this.setupFieldInteractions(),this.setupButtonAnimations(),this.hourlyClaimData={labels:["1 PM","2 PM","3 PM","4 PM","5 PM","6 PM","7 PM","8 PM","9 PM"],datasets:[{label:"Worked Claims",data:Array(9).fill(0),borderWidth:2,borderRadius:5,barThickness:30,tension:.4}]},this.claimChart=null,this.setupHourlyClaimDashboard(),this.initializeHourlyData()}setupHourlyClaimDashboard(){const e=document.getElementById("claimChart").getContext("2d"),t={type:"bar",data:this.hourlyClaimData,options:{responsive:!0,maintainAspectRatio:!1,plugins:{legend:{display:!1},tooltip:{backgroundColor:"var(--secondary)",titleColor:"#dbd7bc",bodyColor:"#dbd7bc",titleFont:{size:14,weight:"bold"},bodyFont:{size:12},padding:10,cornerRadius:8}},scales:{y:{beginAtZero:!0,max:15,ticks:{stepSize:5,color:"#dbd7bc",font:{size:10}},grid:{color:"rgba(255, 255, 255, 0.1)"}},x:{ticks:{color:"#dbd7bc",font:{size:10},maxRotation:0,autoSkip:!1},grid:{display:!1}}},layout:{padding:{left:5,right:5,top:10,bottom:5}}}};this.claimChart=new Chart(e,t),this.updateChartColors(),this.updateChartInfo(),document.querySelectorAll("#hourlyClaimDashB .toggle-btn").forEach((e=>{e.addEventListener("click",(()=>this.toggleChartType(e.dataset.view)))}))}updateChartColors(){const e=e=>e<=4?"var(--red-text)":e<=8?"var(--warning-text)":e<=10?"var(--green-text)":"var(--accent)";this.claimChart.data.datasets[0].backgroundColor=this.claimChart.data.datasets[0].data.map(e),this.claimChart.data.datasets[0].borderColor=this.claimChart.data.datasets[0].data.map(e),this.claimChart.update()}updateChartInfo(){const e=this.hourlyClaimData.datasets[0].data.reduce(((e,t)=>e+t),0),t=e/this.hourlyClaimData.datasets[0].data.filter((e=>e>0)).length||0;document.getElementById("chartInfo").innerHTML=`\n            <div class="info-card">\n                <div class="info-card-title">Total Claims</div>\n                <div class="info-card-value">${e}</div>\n                <div class="trend trend-up">\n                    <span class="trend-icon">▲</span> Updated\n                </div>\n            </div>\n            <div class="info-card">\n                <div class="info-card-title">Avg Claims/Hour</div>\n                <div class="info-card-value">${t.toFixed(2)}</div>\n                <div class="trend trend-up">\n                    <span class="trend-icon">▲</span> Updated\n                </div>\n            </div>\n        `}toggleChartType(e){e!==this.claimChart.config.type&&(this.claimChart.config.type=e,this.claimChart.update(),document.querySelectorAll("#hourlyClaimDashB .toggle-btn").forEach((e=>e.classList.remove("active"))),document.querySelector(`#hourlyClaimDashB .toggle-btn[data-view="${e}"]`).classList.add("active"))}setupRealTimeUpdates(){document.querySelectorAll("input, textarea, [contenteditable]").forEach((e=>{e.addEventListener("input",this.debounce(this.updateOutput.bind(this),300))})),this.elements.xResult&&this.elements.xResult.addEventListener("click",(e=>{this.handleResultClick(e),this.updateOutput()})),this.elements.analysisContainer&&this.elements.analysisContainer.addEventListener("input",this.debounce(this.updateOutput.bind(this),300)),this.elements.xD&&this.elements.xD.addEventListener("input",this.debounce(this.updateOutput.bind(this),300)),this.elements.xAnalysis&&this.elements.xAnalysis.addEventListener("input",this.debounce(this.updateOutput.bind(this),300))}setupEventListeners(){this.elements.xInput.addEventListener("input",this.debounce(this.handleInput.bind(this),300)),this.elements.xD.addEventListener("input",this.debounce(this.updateOutput.bind(this),300)),this.elements.clearBtns.forEach((e=>e.addEventListener("click",this.handleClear.bind(this)))),this.elements.fillButton.addEventListener("click",this.fill.bind(this)),this.elements.fill2Button.addEventListener("click",this.fill2.bind(this)),this.elements.xResult.addEventListener("click",this.handleResultClick.bind(this))}handleInput(n){const s=n.target.value;this.state.hasCCS=s.includes("Claim Display"),this.state.hasCA=s.includes("Checking Account Summary"),this.state.hasCCS||this.state.hasCA?this.state.hasCCS?this.state.hasCA?this.elements.xInput.placeholder="":this.elements.xInput.placeholder="Paste CA content here":this.elements.xInput.placeholder="Paste CCS content here":this.elements.xInput.placeholder="Paste CCS and CA content here",this.state.hasCCS&&this.state.hasCA?this.elements.xInput.style.display="none":this.elements.xInput.style.display="block";const i=function(n){const s={};return Object.entries(t).forEach((([t,i])=>{const a=n.match(i);a&&(s[t]="scenario"===t?e[a[1]]||a[1]:a[1].trim())})),s.disputeCategory=function(e){return["Account Take Over","Third Party Inducement","Counterfeit","Lost","Non Receipt of card","Unauthorized MOTO"].some((t=>e.includes(t)))?"Fraud":"Non-Fraud"}(n),s.sixtyDayLiability=n.includes("Meets 60 day liability rule")?"Yes":"No",s.moreThanTwoYears=function(e){if(!e)return"Unable to determine";const t=new Date(e),n=new Date;return n.setFullYear(n.getFullYear()-2),t<n?"Yes":"No"}(s.transactionDate),s}(s);this.updateResultBox(i),this.currentScenario=i.scenario,this.renderAnalysisFields(this.currentScenario),this.updateAnalysis(i),this.currentScenario?this.elements.selectAllContainer.style.display="block":this.elements.selectAllContainer.style.display="none",Object.entries(i).forEach((([e,t])=>{const n=this.state.fields[e];n&&n.container&&this.updateFieldStatus(n.container,e,t)}))}updateResultBox(e){Object.entries(e).forEach((([e,t])=>{const n=this.state.fields[e];n&&(n.value?(n.value.value=t||"",this.updateFieldStatus(n.container,e,t)):n.details&&this.updateSpecialField(n,t))}))}updateFieldStatus(e,t,n){if(!(e instanceof Element))return;e.classList.remove("green","red","warning","has-value","not-needed","more-info"),e.classList.add("field-container"),this.fieldsRequiringInteraction.includes(t)&&(e.classList.contains("interacted")&&n?(e.classList.add("green"),e.classList.remove("red")):(e.classList.add("red"),e.classList.remove("green"))),e.classList.contains("special-field")||e.classList.add("regular-field");const s=t=>{e.classList.add(t)},i=e=>!e||""===e.trim();if(this.elements.xInput.value.length<50)s("red");else if(i(n)||e.classList.add("has-value"),e.classList.contains("special-field"))this.handleSpecialFieldStatus(e,t,n);else switch(t){case"openDate":if(i(n))s("red");else{const e=new Date;e.setFullYear(e.getFullYear()-1),s(new Date(n)>e?"warning":"green")}break;case"ytdAvgBal":if(i(n))s("red");else{const e=this.state.fields.claimAmount,t=e?parseFloat(e.value.value.replace(/[^0-9.-]+/g,"")):0;s(parseFloat(n.replace(/[^0-9.-]+/g,""))<t?"warning":"green")}break;case"disputeCategory":case"sixtyDayLiability":case"moreThanTwoYears":s(i(n)?"red":"Yes"===n?"warning":"green");break;case"nsf":i(n)?s("red"):s(parseInt(n,10)>9?"warning":"green");break;case"pcUsedToFundOtherClaims":case"unusualDepositPriorToReporting":case"matchingAdjustment":case"claimsFiledLess1yr":case"immediateUseOfFunds":s(i(n)?"red":"green");break;default:i(n)?s("red"):s(this.checkWarningCondition(t,n)?"warning":"green")}}handleSpecialFieldStatus(e,t,n){const s=e.querySelector(".details-input");"withdrew"===t||"merchantCredit"===t||"duplicateClaim"===t?"No"===n?(e.classList.add("green"),e.classList.remove("red")):"6Day"===n||"Immediate"===n||"PC Issued"===n||"No Action Yet"===n?(e.classList.add(""!==s.value.trim()?"green":"red"),e.classList.remove(""!==s.value.trim()?"red":"green")):(e.classList.add("red"),e.classList.remove("green")):"merchantCredit"===t&&e.classList.add("No"===n||("Partial"===n||"Full"===n)&&""!==s.value.trim()?"green":"red")}handleSpecialFieldClick(e,t){const n=this.state.fields[e];if(!n||!n.container)return;const s=n.container,i={buttonsContainer:s.querySelector(".buttons-container"),secondaryButtons:s.querySelector(".secondary-buttons"),detailsInput:s.querySelector(".details-input"),actionButton:s.querySelector(`.${t}-btn`)};s.querySelectorAll("button").forEach((e=>e.classList.remove("selected"))),i.actionButton.classList.add("selected"),["withdrew","merchantCredit","duplicateClaim"].includes(e)?"yes"===t?(i.buttonsContainer.style.display="none",i.secondaryButtons.style.display="grid",s.classList.add("red"),s.classList.remove("green"),n.value="Yes"):"no"===t?(this.resetSpecialField(e),s.classList.add("green"),s.classList.remove("red"),n.value="No"):(i.detailsInput.style.display="grid",i.detailsInput.placeholder="duplicateClaim"===e?"Related Claim No":"Enter details...",n.value=i.actionButton.textContent):"yes"===t?(i.buttonsContainer.style.display="none",i.secondaryButtons.style.display="grid",n.value="Yes"):"no"===t?(this.resetSpecialField(e),s.classList.add("green"),n.value="No"):(i.detailsInput.style.display="grid",n.value=i.actionButton.textContent),this.updateSpecialFieldStatus(s,i.detailsInput),this.updateOutput()}updateSpecialFieldStatus(e,t){t&&"none"!==t.style.display&&(""===t.value.trim()?(e.classList.add("red"),e.classList.remove("green")):(e.classList.add("green"),e.classList.remove("red")))}resetSpecialField(e){const t=this.state.fields[e];if(!t||!t.container)return;const n=t.container,s=n.querySelector(".buttons-container"),i=n.querySelector(".secondary-buttons"),a=n.querySelector(".details-input");n.classList.remove("green","red"),s&&(s.style.display="grid"),i&&(i.style.display="none"),a&&(a.style.display="none",a.value=""),n.querySelectorAll("button").forEach((e=>e.classList.remove("selected")))}handleResetSpecialField(e){this.resetSpecialField(e);const t=this.state.fields[e];t&&t.container&&t.container.classList.remove("green","red")}checkWarningCondition(e,t){const n=new Date;switch(e){case"customerSince":return new Date(t)>new Date(n.setFullYear(n.getFullYear()-1));case"dateOfBirth":const e=this.calculateAge(t);return e>60||e>10&&e<18;default:return!1}}calculateAge(e){const t=new Date,n=new Date(e);let s=t.getFullYear()-n.getFullYear();const i=t.getMonth()-n.getMonth();return(i<0||0===i&&t.getDate()<n.getDate())&&s--,s}handleResultClick(e){const t=e.target.closest(".field-container");if(!t)return;const n=t.dataset.field,s=e.target.classList.contains("yes-btn")?"yes":e.target.classList.contains("no-btn")?"no":e.target.classList.contains("option1-btn")?"option1":e.target.classList.contains("option2-btn")?"option2":null;s&&this.handleSpecialFieldClick(n,s)}updateTitle(e){this.elements.inputTitle&&(this.elements.inputTitle.textContent=e)}renderResultBox(){if(!this.elements.xResult)return;this.elements.xResult.innerHTML="";const e=(t,n)=>{t.forEach((t=>{if(t.fields){const s=document.createElement("div");s.className=t.name,e(t.fields,s),n.appendChild(s)}else{const e=t.special?this.createSpecialFieldElement(t):this.createFieldElement(t);t.className&&e.classList.add(t.className),n.appendChild(e)}}))};[{name:"fields-container",fields:[{name:"accountNumber",label:"Account Number",className:"account-number-field"},{name:"regular-fields",fields:[{name:"scenario",label:"Scenario"},{name:"status",label:"Claim Status"},{name:"claimAmount",label:"Claim Amount"},{name:"disputeCategory",label:"Dispute Ctgry"},{name:"sixtyDayLiability",label:"60 D Liability"},{name:"moreThanTwoYears",label:"Tx > 2 Years"},{name:"customerSince",label:"Cx Since"},{name:"dateOfBirth",label:"Date of Birth"},{name:"openDate",label:"Open Date"},{name:"ytdAvgBal",label:"YTD Avg Bal"},{name:"nsf",label:"NSF"}]},{name:"claimsFiledLess1yr",label:"Claims filed less than 1yr",className:"account-number-field"},{name:"immediateUseOfFunds",label:"Funds Used Immediately",className:"account-number-field"}]},{name:"special-fields",fields:[{name:"withdrew",label:"Withdrew",special:!0},{name:"merchantCredit",label:"Mrct Credit",special:!0},{name:"duplicateClaim",label:"Duplicate Claim",special:!0},{name:"pcUsedToFundOtherClaims",label:"PC Used for Other Claims"},{name:"unusualDepositPriorToReporting",label:"Unusual deposit"},{name:"matchingAdjustment",label:"Matching Adjustment"}]}].forEach((t=>{const n=document.createElement("div");n.className=t.name,e(t.fields,n),this.elements.xResult.appendChild(n)}))}createFieldElement(e){const t=document.createElement("div");t.className="field-container regular-field",t.dataset.field=e.name;const n=document.createElement("span");n.className="field-label",n.textContent=`${e.label}:`;const s=document.createElement("input");let i;return s.type="checkbox",s.className="field-focus-control",["pcUsedToFundOtherClaims","unusualDepositPriorToReporting","matchingAdjustment","claimsFiledLess1yr","immediateUseOfFunds"].includes(e.name)?(i=document.createElement("textarea"),i.rows=3):(i=document.createElement("input"),i.type="text",i.maxLength=12),i.className="field-value",i.id=`field-${e.name}`,"INPUT"===i.tagName&&i.addEventListener("keydown",(e=>{"Enter"===e.key&&(e.preventDefault(),i.blur())})),i.addEventListener("input",(()=>{this.updateFieldStatus(t,e.name,i.value)})),i.addEventListener("blur",(()=>{s.checked=!1})),t.appendChild(n),t.appendChild(s),t.appendChild(i),t.addEventListener("click",(e=>{e.target!==i&&(s.checked=!0,i.focus())})),this.state.fields[e.name]={container:t,value:i},t}createSpecialFieldElement(e){const t=(e,t,n="",s=null)=>{const i=document.createElement(e);return i.className=t,n&&(i.textContent=n),s&&s.appendChild(i),i},n=t("div","field-container special-field");n.dataset.field=e.name;const s=t("div","label-container","",n);t("span","field-label",`${e.label}:`,s);const i=t("button","reset-btn","Reset",s);i.style.display="none";const a=t("div","buttons-container","",n),r=t("div","secondary-buttons","",n),o=()=>{i.style.display="inline-block"};["Yes","No"].forEach((e=>{t("button",`${e.toLowerCase()}-btn`,e,a).addEventListener("click",o)}));let l=[];["withdrew","merchantCredit","duplicateClaim"].includes(e.name)&&(l={withdrew:["6Day","Immediate"],merchantCredit:["Partial","Full"],duplicateClaim:["PC Issued","No Action Yet"]}[e.name].map(((e,n)=>{const s=t("button",`option${n+1}-btn`,e,r);return s.addEventListener("click",(e=>{l.forEach((t=>t.style.display=t===e.target?"inline-block":"none"))})),s})));const d=t("textarea","details-input","",n);return d.placeholder="Enter details...",d.style.height="2em",d.style.resize="none",d.style.overflow="auto",d.addEventListener("input",(()=>this.handleSpecialFieldInput(e.name))),i.addEventListener("click",(()=>{this.handleResetSpecialField(e.name),l.forEach((e=>e.style.display="inline-block")),d.value="",i.style.display="none"})),this.state.fields[e.name]={container:n,detailsInput:d},n}handleSpecialFieldInput(e){const t=this.state.fields[e];if(!t||!t.container)return;const n=t.container,s=n.querySelector(".details-input");this.updateSpecialFieldStatus(n,s)}fill(){this.appendToInput("\t Queues \t Claim \t Financials \t Approvals \t Reconstruction \t Enhanced Claim Search \t Retail Digital Intake \n\tClaim Search\tClick to Minimize\t\n\nClaim Number\n123456789123456\nSearch Results, Total Claims Found: 1\n123456789123456\nD\n09/09/2024 11:03 AM\nClosed\n$119.95\n\nBirth Date:\t02/16/2005 \tSegment:\t \nSSN/TIN:\tXX  Copy \tCustomer Since:\t06/11/2024 \n \t \tStatus:\t03 \n\tClaim Display  Segment: No Special Segment, LOB Tier1: National Ret\nReference Number: 123456789123456\t\nRefresh\tShow Available Actions\tEdit\nCustomer Name:\tD\tClaim Amount:\t$119.95\nSSN:\tXX  Copy\tStatus Code:\tClosed (08)\nTransactions:\nDate\tCode\tScenario\tDescription\tAmount\tAccount\n07/09/2024\t0543 Show Additional Information\tMerchandise not received\tE 7 07/09\t$119.95\tXXXXX2581  Copy Total Checking\nXXXXXXXXXXXX3302  Copy ATM/Debit Card")}fill2(){this.appendToInput("\n\nChecking Account Summary\n\n$0.00\nAverage Balance YTD\n\n$1,188.00\t\nAccrued \n\nNo Assigned Overdraft Officer\nTotal # Occurrences MTD\n\n1\t\nTotal # OD/NSF Occurrences Past 12 Months\n\n61 (days debits presented against NSF funds)\n\nAccount\n\nMiscellaneous\n\nOpen Date\n\n04/10/2023\t\nClose Date\n\n\nNo\nHelpLE")}renderAnalysisFields(e){this.elements.analysisContainer.innerHTML="";const t=this.analyzer.getQuestionsForScenario(e),n=this.analyzer.isFraudScenario(e);this.elements.analysisContainer.style.gridTemplateColumns=n?"1fr":"1fr 1fr",t.forEach(((e,t)=>{const s=this.createFieldContainer(e,t,n);this.elements.analysisContainer.appendChild(s)})),this.updateAnalysisOutput(),this.updateOutput()}createFieldContainer(e,t,n){const s=document.createElement("div");s.className="analysis-field-container",s.dataset.questionIndex=t;const i=document.createElement("span");if(i.className="question-text",i.textContent=e.question,n){const n=this.createFraudFlagContainer("green",e.green),a=this.createFraudFlagContainer("red",e.red),r=document.createElement("input");r.type="text",r.className="fraud-input",r.style.display="none",r.addEventListener("input",(()=>this.updateAnalysisOutput())),s.appendChild(i),s.appendChild(n),s.appendChild(a),s.appendChild(r),s.classList.add("f","placeholder"),n.style.display="grid",a.style.display="none",s.addEventListener("click",(e=>{e.target!==r&&this.handleFraudFieldClick(e,t)})),s.addEventListener("contextmenu",(e=>{e.target!==r&&(this.handleFraudFieldRightClick(e,t),e.preventDefault())}))}else{const e=document.createElement("input");e.type="text",e.className="answer-input",e.value=this.analysisAnswers[t]?.answer||"",e.addEventListener("input",(e=>this.handleAnswerInput(e,t))),s.appendChild(i),s.appendChild(e),s.addEventListener("click",(e=>this.handleNonFraudFieldClick(e,t))),s.addEventListener("contextmenu",(e=>this.handleNonFraudFieldRightClick(e,t)))}return s.addEventListener("dblclick",(e=>this.handleFieldDoubleClick(e,t))),s}createFraudFlagContainer(e,t){const n=document.createElement("div");n.className=`fraud-flag-container f ${e}`,n.style.display="none";const s=document.createElement("span");return s.textContent=t,n.appendChild(s),n}handleNonFraudFieldClick(e,t){e.preventDefault();const n=e.currentTarget;n.classList.contains("more-info")&&this.resetMoreInfoState(n,t)}handleNonFraudFieldRightClick(e,t){e.preventDefault();const n=e.currentTarget;n.classList.contains("more-info")?this.resetMoreInfoState(n,t):(n.classList.add("more-info"),n.querySelector(".answer-input").style.display="none",this.analysisAnswers[t]={answer:"",state:"moreInfo"},this.updateAnalysisFieldStatus(n,t),this.updateAnalysisOutput(),this.updateOutput())}resetMoreInfoState(e,t){e.classList.remove("more-info");const n=e.querySelector(".answer-input");n.style.display="block",n.value="",this.analysisAnswers[t]={answer:"",state:"unanswered"},this.updateAnalysisFieldStatus(e,t),this.updateAnalysisOutput(),this.updateOutput()}createFraudFieldContainer(e,t){const n=document.createElement("div");n.className=`fraud-field-container f ${e}`,n.style.display="none";const s=document.createElement("span");s.textContent=t;const i=document.createElement("input");return i.type="text",i.className="fraud-input",n.appendChild(s),n.appendChild(i),n}handleFraudFieldClick(e,t){e.preventDefault();const n=e.currentTarget;if(n.classList.contains("not-needed"))return;const s=n.querySelector(".f.green"),i=n.querySelector(".f.red"),a=n.querySelector(".fraud-input");n.classList.remove("placeholder","f","red"),n.classList.add("f","green"),s.style.display="grid",i.style.display="none",a.style.display="grid",this.analysisAnswers[t]={answer:"GREEN",state:"answered"},this.updateAnalysisFieldStatus(n,t),this.updateAnalysisOutput(),this.updateOutput()}handleFraudFieldRightClick(e,t){e.preventDefault();const n=e.currentTarget;if(n.classList.contains("not-needed"))return;const s=n.querySelector(".f.green"),i=n.querySelector(".f.red"),a=n.querySelector(".fraud-input");n.classList.remove("placeholder","f","green"),n.classList.add("f","red"),s.style.display="none",i.style.display="block",a.style.display="block",this.analysisAnswers[t]={answer:"RED",state:"answered"},this.updateAnalysisFieldStatus(n,t),this.updateAnalysisOutput(),this.updateOutput()}handleAnswerInput(e,t){const n=e.target.value;this.analysisAnswers[t]={...this.analysisAnswers[t],answer:n,state:n?"answered":"unanswered"},this.updateAnalysisFieldStatus(e.target.closest(".analysis-field-container"),t),this.updateAnalysisOutput(),this.updateOutput()}handleFieldClick(e,t){const n=e.currentTarget,s=n.querySelector(".answer-input");n.classList.contains("not-needed")||n.classList.contains("more-info")||s.focus()}updateAnalysisFieldStatus(e,t){if(!e)return;e.classList.remove("has-value","not-needed","f","red","green","placeholder","more-info");const n=this.analysisAnswers[t];n&&(this.analyzer.isFraudScenario(this.currentScenario)?"answered"===n.state?e.classList.add("f",n.answer.toLowerCase()):"unanswered"===n.state&&e.classList.add("f","placeholder"):"answered"===n.state?e.classList.add("has-value"):"notNeeded"===n.state?e.classList.add("not-needed"):"moreInfo"===n.state&&e.classList.add("more-info"))}handleFieldDoubleClick(e,t){e.preventDefault();const n=e.currentTarget;this.analyzer.isFraudScenario(this.currentScenario)?n.classList.contains("placeholder")?(n.classList.remove("f","placeholder","green","red"),n.querySelector(".f.green").style.display="none",n.querySelector(".f.red").style.display="none",n.querySelector(".fraud-input").style.display="none",this.analysisAnswers[t]={answer:"NOT_REQUIRED",state:"inactive"}):(n.classList.add("f","placeholder"),n.classList.remove("green","red"),n.querySelector(".f.green").style.display="grid",n.querySelector(".f.red").style.display="none",n.querySelector(".fraud-input").style.display="none",this.analysisAnswers[t]={answer:"",state:"unanswered"}):n.classList.contains("not-needed")?(n.classList.remove("not-needed"),n.querySelector(".answer-input").style.display="grid",this.analysisAnswers[t]={answer:"",state:"unanswered"}):(n.classList.add("not-needed"),n.querySelector(".answer-input").style.display="none",this.analysisAnswers[t]={answer:"NOT_REQUIRED",state:"notNeeded"}),this.updateAnalysisFieldStatus(n,t),this.updateAnalysisOutput(),this.updateOutput()}handleFieldRightClick(e,t){e.preventDefault(),this.toggleMoreInfo(t)}toggleNeeded(e){const t=this.getFieldContainer(e);if(!t)return;const n=t.querySelector(".answer-input"),s=t.classList.toggle("not-needed");t.classList.remove("more-info","has-value"),s?(n&&(n.style.display="none",n.value=""),this.analysisAnswers[e]={...this.analysisAnswers[e],state:"notNeeded",answer:"",moreInfo:!1}):(n&&(n.style.display="inline-block"),this.analysisAnswers[e]={...this.analysisAnswers[e],state:"unanswered",moreInfo:!1}),this.updateAnalysisOutput(),this.updateOutput()}toggleMoreInfo(e){const t=this.getFieldContainer(e);if(!t)return;const n=t.querySelector(".answer-input"),s=t.classList.toggle("more-info");t.classList.remove("not-needed","has-value"),s?(n&&(n.style.display="none"),this.analysisAnswers[e]={...this.analysisAnswers[e],state:"moreInfo",moreInfo:!0}):(n&&(n.style.display="inline-block",n.value&&t.classList.add("has-value")),this.analysisAnswers[e]={...this.analysisAnswers[e],state:n.value?"answered":"unanswered",moreInfo:!1}),this.updateAnalysisOutput(),this.updateOutput()}createOptionButton(e,t){const n=document.createElement("button");return n.textContent=e,n.addEventListener("click",t),n}setupShortcuts(){document.addEventListener("keydown",(e=>{if(e.altKey)switch(e.key.toLowerCase()){case"c":e.preventDefault(),this.handleCopy(),this.animateButton(this.elements.copyButton);break;case"s":e.preventDefault(),this.handleLogClaim(),this.animateButton(this.elements.logClaimButton)}}))}handleCopy(){const e=this.elements.xOutput.innerText;navigator.clipboard.writeText(e).then((()=>{})).catch((e=>{console.error("Failed to copy: ",e)}))}handleLogClaim(){console.log("Log Claim shortcut triggered"),this.showLogConfirmation(),this.animateButton(this.elements.logClaimButton)}animateButton(e){e.classList.add("button-press-animation"),e.addEventListener("animationend",(()=>{e.classList.remove("button-press-animation")}),{once:!0})}toggleMoreInfo(e){const t=this.getFieldContainer(e);if(!t)return;const n=t.querySelector(".answer-input"),s=t.querySelector(".toggle-button"),i=t.classList.toggle("more-info");t.classList.remove("not-needed"),s&&(s.textContent="Not Needed"),i?(n&&(n.style.display="none"),this.analysisAnswers[e]={...this.analysisAnswers[e],state:"moreInfo",moreInfo:!0}):(n&&(n.style.display="inline-block"),this.analysisAnswers[e]={...this.analysisAnswers[e],state:"answered",moreInfo:!1}),this.updateAnalysisOutput(),this.updateOutput()}showSelectAllOptions(){const e=this.analyzer.isFraudScenario(this.currentScenario);this.elements.selectAll.style.display="none",this.elements.selectAllActions.style.display="flex",this.elements.selectAllActions.style.flexDirection="column",e?(this.elements.selectNotNeeded.textContent="Not needed",this.elements.selectMoreInfo.textContent="Red",this.elements.selectGreenFlags||(this.elements.selectGreenFlags=document.createElement("button"),this.elements.selectGreenFlags.textContent="Green",this.elements.selectGreenFlags.addEventListener("click",(()=>this.selectAllAction("greenFlags"))),this.elements.selectAllActions.appendChild(this.elements.selectGreenFlags)),this.elements.selectGreenFlags.style.display="block"):(this.elements.selectNotNeeded.textContent="Not Needed",this.elements.selectMoreInfo.textContent="More Info",this.elements.selectGreenFlags&&(this.elements.selectGreenFlags.style.display="none"))}hideSelectAllOptions(){this.elements.selectAllActions.style.display="none",this.elements.selectAll.style.display="block"}selectAllAction(e){const t=this.elements.analysisContainer.querySelectorAll(".analysis-field-container"),n=this.analyzer.isFraudScenario(this.currentScenario);t.forEach(((t,s)=>{n?"notNeeded"===e?this.toggleFraudFieldInactive(t,s):"moreInfo"===e?this.setFraudFieldRed(t,s):"greenFlags"===e&&this.setFraudFieldGreen(t,s):"notNeeded"===e?this.toggleNonFraudFieldNotNeeded(t,s):"moreInfo"===e&&this.setNonFraudFieldMoreInfo(t,s)})),this.hideSelectAllOptions(),this.updateAnalysisOutput(),this.updateOutput()}setFraudFieldRed(e,t){const n=e.querySelector(".f.green"),s=e.querySelector(".f.red"),i=e.querySelector(".fraud-input");e.classList.remove("placeholder","f","green"),e.classList.add("f","red"),n.style.display="none",s.style.display="block",i.style.display="block",this.analysisAnswers[t]={answer:"RED",state:"answered"},this.updateAnalysisFieldStatus(e,t)}setupButtonAnimations(){const e=e=>{e.classList.add("button-press-animation"),e.addEventListener("animationend",(()=>{e.classList.remove("button-press-animation")}),{once:!0})};this.elements.copyButton.addEventListener("click",(()=>e(this.elements.copyButton))),this.elements.logClaimButton.addEventListener("click",(()=>e(this.elements.logClaimButton)))}toggleNonFraudFieldNotNeeded(e,t){e.classList.contains("not-needed")?(e.classList.remove("not-needed"),e.querySelector(".answer-input").style.display="block",this.analysisAnswers[t]={answer:"",state:"unanswered"}):(e.classList.add("not-needed"),e.querySelector(".answer-input").style.display="none",this.analysisAnswers[t]={answer:"NOT_REQUIRED",state:"notNeeded"}),this.updateAnalysisFieldStatus(e,t)}setNonFraudFieldMoreInfo(e,t){e.classList.add("more-info"),e.querySelector(".answer-input").style.display="none",this.analysisAnswers[t]={answer:"",state:"moreInfo"},this.updateAnalysisFieldStatus(e,t)}setFraudFieldGreen(e,t){const n=e.querySelector(".f.green"),s=e.querySelector(".f.red"),i=e.querySelector(".fraud-input");e.classList.remove("placeholder","f","red"),e.classList.add("f","green"),n.style.display="block",s.style.display="none",i.style.display="block",this.analysisAnswers[t]={answer:"GREEN",state:"answered"},this.updateAnalysisFieldStatus(e,t)}toggleFraudFieldInactive(e,t){e.classList.contains("placeholder")?(e.classList.remove("f","placeholder","green","red"),e.querySelector(".f.green").style.display="none",e.querySelector(".f.red").style.display="none",e.querySelector(".fraud-input").style.display="none",this.analysisAnswers[t]={answer:"NOT_REQUIRED",state:"inactive"}):(e.classList.add("f","placeholder"),e.classList.remove("green","red"),e.querySelector(".f.green").style.display="block",e.querySelector(".f.red").style.display="none",e.querySelector(".fraud-input").style.display="none",this.analysisAnswers[t]={answer:"",state:"unanswered"}),this.updateAnalysisFieldStatus(e,t)}toggleMoreInfo(e){const t=this.getFieldContainer(e);if(!t)return;const n=t.querySelector(".answer-input"),s=t.querySelector(".toggle-button"),i=t.classList.toggle("more-info");t.classList.remove("not-needed"),s&&(s.textContent="Not Needed"),i?(n&&(n.style.display="none"),this.analysisAnswers[e]={...this.analysisAnswers[e],state:"moreInfo",moreInfo:!0}):(n&&(n.style.display="inline-block"),this.analysisAnswers[e]={...this.analysisAnswers[e],state:"answered",moreInfo:!1}),this.updateAnalysisOutput(),this.updateOutput()}getFieldContainer(e){return this.elements.analysisContainer.querySelector(`[data-question-index="${e}"]`)}updateAnalysisOutput(){let e="",t=[],n=[],s=[];const i=this.analyzer.isFraudScenario(this.currentScenario),a=this.analyzer.getQuestionsForScenario(this.currentScenario);Object.entries(this.analysisAnswers).forEach((([r,o])=>{const l=a[r];if("notNeeded"!==o.state&&"inactive"!==o.state)if(i){if("answered"===o.state){const e=this.elements.analysisContainer.querySelector(`[data-question-index="${r}"]`).querySelector(".fraud-input"),s="GREEN"===o.answer?l.green:l.red,i=e.value?`\n${e.value}\n`:"\n";"GREEN"===o.answer?t.push(s+i):"RED"===o.answer&&n.push(s+i)}}else"answered"===o.state?e+=`${l.question}: ${o.answer||""}\n`:"moreInfo"===o.state&&s.push(l.question)})),i&&(t.length>0&&(e+="Green Flags:\n",t.forEach((t=>e+=`- ${t}`))),n.length>0&&(e+="Red Flags:\n",n.forEach((t=>e+=`- ${t}`)))),s.length>0&&(e+="\nMore info needed, please ask the customer the following questions to proceed with their claim:\n",s.forEach((t=>e+=`- ${t}\n`))),this.elements.xAnalysis?this.elements.xAnalysis.value=e:console.warn("xAnalysis element not found")}updateAnalysis(e){if(!this.analyzer)return;const t=this.analyzer.analyze(e);this.elements.xAnalysis&&(this.elements.xAnalysis.value=t)}saveHourlyData(){const e={date:(new Date).toDateString(),data:this.hourlyClaimData.datasets[0].data};localStorage.setItem("hourlyClaimData",JSON.stringify(e))}updateStep1Content(){let e="";Object.entries({scenario:"Claim Scenario",status:"Pre Review Claim Status",duplicateClaim:"Duplicate",merchantCredit:"MC (Partial/Full)",withdrew:"Withdrew",matchingAdjustment:"Matching Adjustment"}).forEach((([t,n])=>{const s=this.state.fields[t];let i=this.getFieldValue(s,t);if(e+=`${n}: ${i}<br>`,s&&s.detailsInput&&"none"!==s.detailsInput.style.display){const t=s.detailsInput.value;if(""!==t.trim()){const n=t.replace(/\n/g,"<br>");e+=`${n}<br>`}}})),this.updateOutputSection("step1Content",e)}updateStep2Content(){let e="";Object.entries({claimAmount:"Claim Amount",disputeCategory:"Dispute Category",sixtyDayLiability:"60 Day Liability",moreThanTwoYears:"Tran more than 2yrs"}).forEach((([t,n])=>{const s=this.state.fields[t],i=this.getFieldValue(s,t);e+=`${n}: ${i}<br>`}));const t=this.state.fields.dateOfBirth,n=this.getFieldValue(t,"dateOfBirth");if(this.calculateAge(n)>60){const t=this.state.fields.elderlyAbuse,n=this.getFieldValue(t,"elderlyAbuse");e+=`Elderly Abuse: ${n}<br>`}e+="<br><h3>FPF Indicators:</h3>",Object.entries({customerSince:"Customer since",openDate:"Open date",ytdAvgBal:"YTD Avg Bal",nsf:"NSF",dateOfBirth:"DOB",claimsFiledLess1yr:"Claims filed less 1yr",immediateUseOfFunds:"Immediate use of funds",pcUsedToFundOtherClaims:"PC Used to fund other claims",unusualDepositPriorToReporting:"Unusual deposit prior to reporting"}).forEach((([t,n])=>{const s=this.state.fields[t],i=this.getFieldValue(s,t);e+=`${n}: ${i}<br>`})),e+="<br><h3>Insights/Findings:</h3>",this.elements.xAnalysis&&(e+=this.elements.xAnalysis.value.replace(/\n/g,"<br>")),this.updateOutputSection("step2Content",e)}calculateAge(e){if(!e)return 0;const t=new Date,n=new Date(e);let s=t.getFullYear()-n.getFullYear();const i=t.getMonth()-n.getMonth();return(i<0||0===i&&t.getDate()<n.getDate())&&s--,s}updateStep3Content(){if(this.elements.xD){const e=this.elements.xD.value.split(/Step \d+:/);if(e.length>1){let t=e[1].trim();t=t.replace(/^Decision\s+/,""),t=t.replace(/\n/g,"<br>"),this.updateOutputSection("step3Content",t)}}}updateStep4Content(){if(this.elements.xD){const e=this.elements.xD.value.split(/Step \d+:/);if(e.length>2){let t=e[2].trim();t=t.replace(/^Claim Resolution Action\s+/,""),t=t.replace(/\n/g,"<br>"),this.updateOutputSection("step4Content",t)}}}updateStep5Content(){if(this.elements.xD){const e=this.elements.xD.value.split(/Step \d+:/);if(e.length>3){let t=e[3].trim();t=t.replace(/^Next steps \(If applicable\)\s+/,""),t=t.replace(/\n/g,"<br>"),this.updateOutputSection("step5Content",t)}}}setupFieldInteractions(){this.fieldsRequiringInteraction.forEach((e=>{const t=this.state.fields[e];t&&t.container&&(t.value&&t.value.addEventListener("input",(()=>this.handleFieldInteraction(e))),"withdrew"!==e&&"merchantCredit"!==e&&"duplicateClaim"!==e||t.container.querySelectorAll("button").forEach((t=>{t.addEventListener("click",(()=>this.handleFieldInteraction(e)))})))}))}handleFieldInteraction(e){const t=this.state.fields[e];t&&t.container&&(t.container.classList.add("interacted"),this.updateFieldStatus(t.container,e,this.getFieldValue(t,e)))}getFieldValue(e,t){if(["withdrew","merchantCredit","duplicateClaim"].includes(t)){if(e.value)return e.value;{const t=e.container.querySelector(".selected");return t?t.textContent:""}}if(e&&e.value){if("string"==typeof e.value)return e.value;if(e.value.value)return e.value.value}return""}updateOutputSection(e,t){const n=this.elements[e];n?n.innerHTML=t:console.warn(`Element with id '${e}' not found.`)}refreshOutput(){this.updateOutput()}updateOutput(){this.updateStep1Content(),this.updateStep2Content(),this.updateStep3Content(),this.updateStep4Content(),this.updateStep5Content()}handleClear(e){const t=e.target.closest(".box"),n=t.querySelector("textarea"),s=t.querySelector("[contenteditable]");n&&(n.value=""),s&&(s.textContent=""),this.updateOutput(),this.resetLayout()}showCopyFeedback(e){const t=document.createElement("div");t.textContent=e,t.style.position="fixed",t.style.bottom="20px",t.style.left="50%",t.style.transform="translateX(-50%)",t.style.padding="10px 20px",t.style.backgroundColor="rgba(0, 0, 0, 0.7)",t.style.color="white",t.style.borderRadius="5px",t.style.zIndex="1000",document.body.appendChild(t)}formatTime(e){const t=Math.floor(e/3600),n=Math.floor(e%3600/60),s=e%60;return`${this.pad(t)}:${this.pad(n)}:${this.pad(s)}`}pad(e){return e.toString().padStart(2,"0")}showLogConfirmation(){const e=document.createElement("div");e.className="log-confirmation-popup",e.innerHTML='\n            <div class="popup-content">\n                <h2>Confirm Log Claim</h2>\n                <p>Are you sure you want to log this claim?</p>\n                <button id="confirmLog">Confirm</button>\n                <button id="cancelLog">Cancel</button>\n            </div>\n        ',document.body.appendChild(e),this.elements.timerrs&&this.pauseTimer(),document.getElementById("confirmLog").addEventListener("click",(()=>{this.logClaim()})),document.getElementById("cancelLog").addEventListener("click",(()=>{document.body.removeChild(e),this.elements.timerrs&&this.resumeTimer()})),e.addEventListener("click",(t=>{t.target===e&&(document.body.removeChild(e),this.elements.timerrs&&this.resumeTimer())}))}logClaim(){const e={timestamp:(new Date).toISOString(),claimNumber:this.getFieldValue(this.state.fields.accountNumber,"accountNumber"),scenario:this.getFieldValue(this.state.fields.scenario,"scenario"),duration:this.elements.timerrs?this.elements.timerrs.textContent:"N/A",content:this.elements.xOutput?this.elements.xOutput.innerHTML:""},t=(new Date).getHours();if(t>=13&&t<21){const e=t-13;this.hourlyClaimData.datasets[0].data[e]++,this.debouncedUpdateChart(),this.updateChartInfo()}let n=JSON.parse(localStorage.getItem("allClaimLogs")||"[]");n.unshift(e),localStorage.setItem("allClaimLogs",JSON.stringify(n)),this.claimChart.update(),this.updateChartColors(),this.updateChartInfo();let s=n.slice(0,10);localStorage.setItem("claimLogs",JSON.stringify(s)),this.saveHourlyData(),window.location.reload()}initializeHourlyData(){const e=localStorage.getItem("hourlyClaimData");if(e){const t=JSON.parse(e);t.date===(new Date).toDateString()?this.hourlyClaimData.datasets[0].data=t.data:this.hourlyClaimData.datasets[0].data=Array(24).fill(0)}this.claimChart.update(),this.updateChartColors(),this.updateChartInfo()}startTimer(){let e=0;this.timerInterval=setInterval((()=>{e++;const t=Math.floor(e/3600),n=Math.floor(e%3600/60),s=e%60,i=`${t.toString().padStart(2,"0")}:${n.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}`;this.elements.timerrs&&(this.elements.timerrs.textContent=i)}),1e3)}pauseTimer(){this.timerInterval&&clearInterval(this.timerInterval)}resumeTimer(){this.startTimer()}handleLogClaim(){this.showLogConfirmation()}handleCustomizeShortcuts(){}debounce(e,t){let n;return function(...s){clearTimeout(n),n=setTimeout((()=>e.apply(this,s)),t)}}appendToInput(e){const t=e+this.elements.xInput.value;this.elements.xInput.value=t,this.handleInput({target:{value:t}}),this.updateTitle(" "),this.elements.xInput.scrollTop=0}}const i={dark:{primary:"linear-gradient(rgba(255, 255, 255, 0.034), rgba(49, 49, 49, 0.425)), linear-gradient(to top, #000000, #0e0e0e, #111)",secondary:"#222222",accent:"#00B2B2",bg:"rgba(0, 0, 0, 0.911)",text:"#dbd7bc",greenField:"rgba(53, 255, 53, 0.1)"},light:{primary:"#FFFFFF",secondary:"#F0F4F8",accent:"#00B2B2",bg:"#E2E8F0",text:"#212121",greenField:"rgba(0, 200, 0, 0.1)"}};new class{constructor(){this.state={currentScheme:"dark"},this.init()}init(){document.getElementById("colorSchemeToggle").addEventListener("click",(()=>this.toggleColorScheme())),this.updateColors()}toggleColorScheme(){this.state.currentScheme="dark"===this.state.currentScheme?"light":"dark",this.updateColors(),this.updateToggleButton()}updateColors(){const e=document.documentElement,t=i[this.state.currentScheme];e.classList.remove("light-mode","dark-mode"),e.classList.add(this.state.currentScheme+"-mode");for(const[n,s]of Object.entries(t))e.style.setProperty(`--${n}`,s)}updateToggleButton(){document.getElementById("colorSchemeToggle").textContent={dark:"🌙",light:"☀️"}[this.state.currentScheme]}},document.addEventListener("DOMContentLoaded",(()=>{window.claimTool=new s}))})();</script></body></html>
